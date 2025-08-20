@@ -8,7 +8,7 @@ const HockeyCardCalendar = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const releasesPerPage = 5;
+  const releasesPerPage = 3;
 
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7bXBVQ-wEiJdCk8-E-ZooW_wUhSRMVaJxvRoEMGquWgd-c3iBDcwpFpG7IuN104Qn1AKDtVtxqKWa/pub?output=csv';
 
@@ -112,23 +112,43 @@ const HockeyCardCalendar = () => {
   return React.createElement('div', { 
     className: "min-h-screen", 
     style: { 
-      background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
+      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 25%, #06b6d4 50%, #8b5cf6 75%, #ec4899 100%)',
+      backgroundSize: '400% 400%',
+      animation: 'gradientShift 15s ease infinite',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }
   },
+    // Add keyframes for animated gradient
+    React.createElement('style', {}, `
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    `),
     React.createElement('div', { 
       className: "max-w-6xl mx-auto p-6",
-      style: { minHeight: '100vh' }
+      style: { 
+        minHeight: '100vh',
+        background: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '24px',
+        margin: '20px auto',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
+      }
     },
       
       // Header
       React.createElement('div', { 
         className: "mb-8 p-6 rounded-lg",
         style: {
-          background: 'rgba(255,255,255,0.1)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          textAlign: 'center'
+          background: 'rgba(255,255,255,0.15)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '20px',
+          textAlign: 'center',
+          boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)'
         }
       },
         React.createElement('h1', { 
@@ -152,11 +172,13 @@ const HockeyCardCalendar = () => {
       React.createElement('div', { 
         className: "flex items-center justify-between mb-6 p-4 rounded-lg",
         style: {
-          background: 'rgba(255,255,255,0.1)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)',
+          background: 'rgba(255,255,255,0.15)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '16px',
           flexWrap: 'wrap',
-          gap: '15px'
+          gap: '15px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
         }
       },
         // Navigation
@@ -165,10 +187,12 @@ const HockeyCardCalendar = () => {
             onClick: () => navigateMonth(-1),
             className: "p-2 rounded-lg transition-colors",
             style: {
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: '12px',
               color: 'white',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
             }
           }, React.createElement(ChevronLeft, { className: "w-5 h-5" })),
           
@@ -181,10 +205,12 @@ const HockeyCardCalendar = () => {
             onClick: () => navigateMonth(1),
             className: "p-2 rounded-lg transition-colors",
             style: {
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: '12px',
               color: 'white',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
             }
           }, React.createElement(ChevronRight, { className: "w-5 h-5" }))
         ),
@@ -195,10 +221,12 @@ const HockeyCardCalendar = () => {
             onClick: () => setCurrentDate(new Date()),
             className: "px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
             style: {
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: '12px',
               color: 'white',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
             }
           },
             React.createElement(Calendar, { className: "w-4 h-4" }),
@@ -210,11 +238,13 @@ const HockeyCardCalendar = () => {
             disabled: isLoading,
             className: "px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
             style: {
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: '12px',
               color: 'white',
               cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.7 : 1
+              opacity: isLoading ? 0.7 : 1,
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
             }
           },
             React.createElement(RefreshCw, { 
@@ -250,10 +280,11 @@ const HockeyCardCalendar = () => {
       React.createElement('div', { 
         className: "rounded-lg overflow-hidden mb-8",
         style: {
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+          background: 'rgba(255,255,255,0.98)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '20px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         }
       },
         // Days of week header
@@ -342,10 +373,11 @@ const HockeyCardCalendar = () => {
       React.createElement('div', { 
         className: "rounded-lg p-6",
         style: {
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+          background: 'rgba(255,255,255,0.98)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '20px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         }
       },
         React.createElement('h3', { 
