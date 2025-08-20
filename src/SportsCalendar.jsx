@@ -7,6 +7,8 @@ const HockeyCardCalendar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const releasesPerPage = 5;
 
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7bXBVQ-wEiJdCk8-E-ZooW_wUhSRMVaJxvRoEMGquWgd-c3iBDcwpFpG7IuN104Qn1AKDtVtxqKWa/pub?output=csv';
 
@@ -102,6 +104,7 @@ const HockeyCardCalendar = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
+    setCurrentPage(0); // Reset pagination when changing months
   };
 
   const days = getDaysInMonth(currentDate);
@@ -290,36 +293,44 @@ const HockeyCardCalendar = () => {
                   style: { color: isToday ? '#2563eb' : '#111827' }
                 }, date.getDate()),
                 
-                releases.map(release =>
+                // Show first 2 releases, then a "+X more" indicator
+                releases.slice(0, 2).map(release =>
                   React.createElement('div', {
                     key: release.id,
-                    className: "mb-2 p-2 rounded-md border text-xs cursor-pointer transition-shadow",
+                    className: "mb-1 p-1 rounded border text-xs cursor-pointer transition-shadow",
                     style: {
                       backgroundColor: '#dbeafe',
                       borderColor: '#3b82f6',
                       color: '#1e40af'
                     },
                     onMouseEnter: (e) => {
-                      e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                      e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
                     }
                   },
-                    React.createElement('div', { className: "flex items-center gap-1 mb-1" },
-                      React.createElement('span', { className: "text-lg" }, "🏒"),
-                      React.createElement(Package, { 
-                        className: "w-3 h-3" 
-                      })
-                    ),
-                    React.createElement('div', { 
-                      className: "font-semibold truncate",
-                      style: { fontSize: '11px' }
-                    }, release.setName),
-                    React.createElement('div', { 
-                      style: { opacity: 0.8, fontSize: '10px' }
-                    }, release.year)
+                    React.createElement('div', { className: "flex items-center gap-1" },
+                      React.createElement('span', { style: { fontSize: '10px' } }, "🏒"),
+                      React.createElement('div', { 
+                        className: "font-semibold truncate",
+                        style: { fontSize: '9px', lineHeight: '1.2' }
+                      }, release.setName.length > 20 ? release.setName.substring(0, 20) + '...' : release.setName)
+                    )
                   )
+                ).concat(
+                  releases.length > 2 ? [
+                    React.createElement('div', {
+                      key: 'more',
+                      className: "text-xs text-center p-1 rounded",
+                      style: {
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280',
+                        fontSize: '9px',
+                        fontWeight: '500'
+                      }
+                    }, `+${releases.length - 2} more`)
+                  ] : []
                 )
               )
             );
@@ -346,14 +357,20 @@ const HockeyCardCalendar = () => {
         ),
         
         React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
-          cardReleases
-            .filter(release => 
-              release.releaseDate &&
-              release.releaseDate.getMonth() === currentDate.getMonth() &&
-              release.releaseDate.getFullYear() === currentDate.getFullYear()
-            )
-            .sort((a, b) => a.releaseDate - b.releaseDate)
-            .map(release =>
+          (() => {
+            const monthReleases = cardReleases
+              .filter(release => 
+                release.releaseDate &&
+                release.releaseDate.getMonth() === currentDate.getMonth() &&
+                release.releaseDate.getFullYear() === currentDate.getFullYear()
+              )
+              .sort((a, b) => a.releaseDate - b.releaseDate);
+            
+            const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
+            const startIndex = currentPage * releasesPerPage;
+            const paginatedReleases = monthReleases.slice(startIndex, startIndex + releasesPerPage);
+            
+            return paginatedReleases.map(release =>
               React.createElement('div', {
                 key: release.id,
                 className: "border rounded-lg p-4 transition-shadow",
@@ -407,8 +424,57 @@ const HockeyCardCalendar = () => {
                   )
                 )
               )
-            )
-        )
+            );
+          })()
+        ),
+        
+        // Pagination for upcoming releases
+        (() => {
+          const monthReleases = cardReleases
+            .filter(release => 
+              release.releaseDate &&
+              release.releaseDate.getMonth() === currentDate.getMonth() &&
+              release.releaseDate.getFullYear() === currentDate.getFullYear()
+            );
+          
+          const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
+          
+          if (totalPages <= 1) return null;
+          
+          return React.createElement('div', {
+            className: "flex justify-center items-center gap-3 mt-6",
+            style: { paddingTop: '20px', borderTop: '1px solid #e5e7eb' }
+          },
+            React.createElement('button', {
+              onClick: () => setCurrentPage(Math.max(0, currentPage - 1)),
+              disabled: currentPage === 0,
+              className: "px-4 py-2 rounded-lg transition-colors",
+              style: {
+                background: currentPage === 0 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
+                color: currentPage === 0 ? '#9ca3af' : '#4a90a4',
+                border: `1px solid ${currentPage === 0 ? '#e5e7eb' : '#4a90a4'}`,
+                cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
+              }
+            }, '← Previous'),
+            
+            React.createElement('span', {
+              className: "text-sm font-medium",
+              style: { color: '#4a90a4' }
+            }, `Page ${currentPage + 1} of ${totalPages} (${monthReleases.length} total releases)`),
+            
+            React.createElement('button', {
+              onClick: () => setCurrentPage(Math.min(totalPages - 1, currentPage + 1)),
+              disabled: currentPage === totalPages - 1,
+              className: "px-4 py-2 rounded-lg transition-colors",
+              style: {
+                background: currentPage === totalPages - 1 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
+                color: currentPage === totalPages - 1 ? '#9ca3af' : '#4a90a4',
+                border: `1px solid ${currentPage === totalPages - 1 ? '#e5e7eb' : '#4a90a4'}`,
+                cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
+              }
+            }, 'Next →')
+          );
+        })()
       )
     )
   );
