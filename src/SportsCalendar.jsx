@@ -167,7 +167,7 @@ const HockeyCardCalendar = () => {
             fontSize: '16px',
             margin: 0
           }
-        }, "Track upcoming hockey card releases and pre-orders")
+        }, "Track upcoming hockey card releases all releases dates are subject to revision by UD")
       ),
 
       // Controls Bar
