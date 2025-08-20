@@ -375,26 +375,46 @@ const HockeyCardCalendar = () => {
                       e.target.appendChild(tooltip);
                       e.target._tooltip = tooltip;
                       
-                      // Add scroll listener to clean up tooltip
+                      // Multiple cleanup handlers for different scroll scenarios
                       const cleanupTooltip = () => {
-                        if (e.target._tooltip) {
-                          e.target.removeChild(e.target._tooltip);
+                        if (e.target && e.target._tooltip) {
+                          try {
+                            e.target.removeChild(e.target._tooltip);
+                          } catch (err) {
+                            // Tooltip already removed
+                          }
                           e.target._tooltip = null;
                         }
-                        window.removeEventListener('scroll', cleanupTooltip, true);
                       };
-                      window.addEventListener('scroll', cleanupTooltip, true);
-                      e.target._scrollCleanup = cleanupTooltip;
+                      
+                      // Listen for various scroll events
+                      const scrollEvents = ['scroll', 'wheel', 'touchmove'];
+                      scrollEvents.forEach(eventType => {
+                        window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                        document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                      });
+                      
+                      // Store cleanup function
+                      e.target._cleanupTooltip = () => {
+                        cleanupTooltip();
+                        scrollEvents.forEach(eventType => {
+                          window.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                          document.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                        });
+                      };
+                      
+                      // Auto-cleanup after 3 seconds as backup
+                      setTimeout(() => {
+                        if (e.target && e.target._cleanupTooltip) {
+                          e.target._cleanupTooltip();
+                        }
+                      }, 3000);
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
-                      if (e.target._tooltip) {
-                        e.target.removeChild(e.target._tooltip);
-                        e.target._tooltip = null;
-                      }
-                      if (e.target._scrollCleanup) {
-                        window.removeEventListener('scroll', e.target._scrollCleanup, true);
-                        e.target._scrollCleanup = null;
+                      if (e.target._cleanupTooltip) {
+                        e.target._cleanupTooltip();
+                        e.target._cleanupTooltip = null;
                       }
                     }
                   },
@@ -458,25 +478,45 @@ const HockeyCardCalendar = () => {
                         e.target.appendChild(tooltip);
                         e.target._tooltip = tooltip;
                         
-                        // Add scroll listener to clean up tooltip
+                        // Multiple cleanup handlers for different scroll scenarios
                         const cleanupTooltip = () => {
-                          if (e.target._tooltip) {
-                            e.target.removeChild(e.target._tooltip);
+                          if (e.target && e.target._tooltip) {
+                            try {
+                              e.target.removeChild(e.target._tooltip);
+                            } catch (err) {
+                              // Tooltip already removed
+                            }
                             e.target._tooltip = null;
                           }
-                          window.removeEventListener('scroll', cleanupTooltip, true);
                         };
-                        window.addEventListener('scroll', cleanupTooltip, true);
-                        e.target._scrollCleanup = cleanupTooltip;
+                        
+                        // Listen for various scroll events
+                        const scrollEvents = ['scroll', 'wheel', 'touchmove'];
+                        scrollEvents.forEach(eventType => {
+                          window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                          document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                        });
+                        
+                        // Store cleanup function
+                        e.target._cleanupTooltip = () => {
+                          cleanupTooltip();
+                          scrollEvents.forEach(eventType => {
+                            window.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                            document.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
+                          });
+                        };
+                        
+                        // Auto-cleanup after 3 seconds as backup
+                        setTimeout(() => {
+                          if (e.target && e.target._cleanupTooltip) {
+                            e.target._cleanupTooltip();
+                          }
+                        }, 3000);
                       },
                       onMouseLeave: (e) => {
-                        if (e.target._tooltip) {
-                          e.target.removeChild(e.target._tooltip);
-                          e.target._tooltip = null;
-                        }
-                        if (e.target._scrollCleanup) {
-                          window.removeEventListener('scroll', e.target._scrollCleanup, true);
-                          e.target._scrollCleanup = null;
+                        if (e.target._cleanupTooltip) {
+                          e.target._cleanupTooltip();
+                          e.target._cleanupTooltip = null;
                         }
                       }
                     }, `+${releases.length - 2} more`)
