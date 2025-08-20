@@ -8,6 +8,7 @@ const HockeyCardCalendar = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const releasesPerPage = 3;
 
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7bXBVQ-wEiJdCk8-E-ZooW_wUhSRMVaJxvRoEMGquWgd-c3iBDcwpFpG7IuN104Qn1AKDtVtxqKWa/pub?output=csv';
@@ -105,6 +106,7 @@ const HockeyCardCalendar = () => {
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
     setCurrentPage(0); // Reset pagination when changing months
+    setIsDropdownOpen(false); // Close dropdown when changing months
   };
 
   const days = getDaysInMonth(currentDate);
@@ -416,9 +418,9 @@ const HockeyCardCalendar = () => {
         )
       ),
 
-      // Upcoming Releases List
+      // Upcoming Releases Dropdown
       React.createElement('div', { 
-        className: "rounded-lg p-6",
+        className: "rounded-lg",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
@@ -427,133 +429,174 @@ const HockeyCardCalendar = () => {
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         }
       },
-        React.createElement('h3', { 
-          className: "text-xl font-bold mb-4 flex items-center gap-2",
-          style: { color: '#4a90a4' }
+        // Dropdown Header (always visible)
+        React.createElement('div', {
+          className: "p-4 cursor-pointer flex items-center justify-between",
+          onClick: () => setIsDropdownOpen(!isDropdownOpen),
+          style: {
+            borderBottom: isDropdownOpen ? '1px solid #e5e7eb' : 'none',
+            borderRadius: isDropdownOpen ? '20px 20px 0 0' : '20px',
+            transition: 'all 0.3s ease'
+          }
         },
-          React.createElement('span', { className: "text-2xl" }, "🏒"),
-          "Upcoming Hockey Releases This Month"
+          React.createElement('h3', { 
+            className: "text-xl font-bold flex items-center gap-2",
+            style: { color: '#4a90a4', margin: 0 }
+          },
+            React.createElement('span', { className: "text-2xl" }, "🏒"),
+            "Upcoming Hockey Releases This Month",
+            React.createElement('span', {
+              className: "text-sm font-normal ml-2 px-2 py-1 rounded",
+              style: {
+                backgroundColor: 'rgba(74, 144, 164, 0.1)',
+                color: '#4a90a4'
+              }
+            }, (() => {
+              const monthReleases = cardReleases.filter(release => 
+                release.releaseDate &&
+                release.releaseDate.getMonth() === currentDate.getMonth() &&
+                release.releaseDate.getFullYear() === currentDate.getFullYear()
+              );
+              return `${monthReleases.length} total`;
+            })())
+          ),
+          React.createElement('div', {
+            className: "text-2xl",
+            style: {
+              transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s ease',
+              color: '#4a90a4'
+            }
+          }, '▼')
         ),
         
-        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
+        // Dropdown Content (collapsible)
+        isDropdownOpen && React.createElement('div', {
+          className: "p-6",
+          style: {
+            borderRadius: '0 0 20px 20px'
+          }
+        },
+          React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
+            (() => {
+              const monthReleases = cardReleases
+                .filter(release => 
+                  release.releaseDate &&
+                  release.releaseDate.getMonth() === currentDate.getMonth() &&
+                  release.releaseDate.getFullYear() === currentDate.getFullYear()
+                )
+                .sort((a, b) => a.releaseDate - b.releaseDate);
+              
+              const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
+              const startIndex = currentPage * releasesPerPage;
+              const paginatedReleases = monthReleases.slice(startIndex, startIndex + releasesPerPage);
+              
+              return paginatedReleases.map(release =>
+                React.createElement('div', {
+                  key: release.id,
+                  className: "border rounded-lg p-4 transition-shadow",
+                  style: {
+                    borderColor: '#e5e7eb',
+                    backgroundColor: 'white'
+                  },
+                  onMouseEnter: (e) => {
+                    e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                    e.target.style.borderColor = '#4a90a4';
+                  },
+                  onMouseLeave: (e) => {
+                    e.target.style.boxShadow = 'none';
+                    e.target.style.borderColor = '#e5e7eb';
+                  }
+                },
+                  React.createElement('div', { className: "flex items-start gap-3" },
+                    React.createElement('div', { className: "text-3xl" }, "🏒"),
+                    React.createElement('div', { className: "flex-1" },
+                      React.createElement('h4', { 
+                        className: "font-semibold mb-1",
+                        style: { color: '#111827' }
+                      }, release.setName),
+                      React.createElement('p', { 
+                        className: "text-sm mb-2",
+                        style: { color: '#6b7280' }
+                      }, `${release.year} Series`),
+                      React.createElement('div', { 
+                        className: "flex items-center gap-2 mb-2" 
+                      },
+                        React.createElement('span', {
+                          className: "px-2 py-1 text-xs font-medium rounded",
+                          style: {
+                            backgroundColor: '#dbeafe',
+                            color: '#1e40af'
+                          }
+                        }, 'Release'),
+                        React.createElement(Package, { 
+                          className: "w-3 h-3",
+                          style: { color: '#4a90a4' }
+                        })
+                      ),
+                      React.createElement('div', { 
+                        className: "flex items-center justify-between" 
+                      },
+                        React.createElement('span', { 
+                          className: "text-sm",
+                          style: { color: '#6b7280' }
+                        }, release.releaseDate.toLocaleDateString())
+                      )
+                    )
+                  )
+                )
+              );
+            })()
+          ),
+          
+          // Pagination for upcoming releases (only show when dropdown is open)
           (() => {
             const monthReleases = cardReleases
               .filter(release => 
                 release.releaseDate &&
                 release.releaseDate.getMonth() === currentDate.getMonth() &&
                 release.releaseDate.getFullYear() === currentDate.getFullYear()
-              )
-              .sort((a, b) => a.releaseDate - b.releaseDate);
+              );
             
             const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
-            const startIndex = currentPage * releasesPerPage;
-            const paginatedReleases = monthReleases.slice(startIndex, startIndex + releasesPerPage);
             
-            return paginatedReleases.map(release =>
-              React.createElement('div', {
-                key: release.id,
-                className: "border rounded-lg p-4 transition-shadow",
+            if (totalPages <= 1) return null;
+            
+            return React.createElement('div', {
+              className: "flex justify-center items-center gap-3 mt-6",
+              style: { paddingTop: '20px', borderTop: '1px solid #e5e7eb' }
+            },
+              React.createElement('button', {
+                onClick: () => setCurrentPage(Math.max(0, currentPage - 1)),
+                disabled: currentPage === 0,
+                className: "px-4 py-2 rounded-lg transition-colors",
                 style: {
-                  borderColor: '#e5e7eb',
-                  backgroundColor: 'white'
-                },
-                onMouseEnter: (e) => {
-                  e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                  e.target.style.borderColor = '#4a90a4';
-                },
-                onMouseLeave: (e) => {
-                  e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#e5e7eb';
+                  background: currentPage === 0 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
+                  color: currentPage === 0 ? '#9ca3af' : '#4a90a4',
+                  border: `1px solid ${currentPage === 0 ? '#e5e7eb' : '#4a90a4'}`,
+                  cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
                 }
-              },
-                React.createElement('div', { className: "flex items-start gap-3" },
-                  React.createElement('div', { className: "text-3xl" }, "🏒"),
-                  React.createElement('div', { className: "flex-1" },
-                    React.createElement('h4', { 
-                      className: "font-semibold mb-1",
-                      style: { color: '#111827' }
-                    }, release.setName),
-                    React.createElement('p', { 
-                      className: "text-sm mb-2",
-                      style: { color: '#6b7280' }
-                    }, `${release.year} Series`),
-                    React.createElement('div', { 
-                      className: "flex items-center gap-2 mb-2" 
-                    },
-                      React.createElement('span', {
-                        className: "px-2 py-1 text-xs font-medium rounded",
-                        style: {
-                          backgroundColor: '#dbeafe',
-                          color: '#1e40af'
-                        }
-                      }, 'Release'),
-                      React.createElement(Package, { 
-                        className: "w-3 h-3",
-                        style: { color: '#4a90a4' }
-                      })
-                    ),
-                    React.createElement('div', { 
-                      className: "flex items-center justify-between" 
-                    },
-                      React.createElement('span', { 
-                        className: "text-sm",
-                        style: { color: '#6b7280' }
-                      }, release.releaseDate.toLocaleDateString())
-                    )
-                  )
-                )
-              )
+              }, '← Previous'),
+              
+              React.createElement('span', {
+                className: "text-sm font-medium",
+                style: { color: '#4a90a4' }
+              }, `Page ${currentPage + 1} of ${totalPages} (${monthReleases.length} total releases)`),
+              
+              React.createElement('button', {
+                onClick: () => setCurrentPage(Math.min(totalPages - 1, currentPage + 1)),
+                disabled: currentPage === totalPages - 1,
+                className: "px-4 py-2 rounded-lg transition-colors",
+                style: {
+                  background: currentPage === totalPages - 1 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
+                  color: currentPage === totalPages - 1 ? '#9ca3af' : '#4a90a4',
+                  border: `1px solid ${currentPage === totalPages - 1 ? '#e5e7eb' : '#4a90a4'}`,
+                  cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
+                }
+              }, 'Next →')
             );
           })()
-        ),
-        
-        // Pagination for upcoming releases
-        (() => {
-          const monthReleases = cardReleases
-            .filter(release => 
-              release.releaseDate &&
-              release.releaseDate.getMonth() === currentDate.getMonth() &&
-              release.releaseDate.getFullYear() === currentDate.getFullYear()
-            );
-          
-          const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
-          
-          if (totalPages <= 1) return null;
-          
-          return React.createElement('div', {
-            className: "flex justify-center items-center gap-3 mt-6",
-            style: { paddingTop: '20px', borderTop: '1px solid #e5e7eb' }
-          },
-            React.createElement('button', {
-              onClick: () => setCurrentPage(Math.max(0, currentPage - 1)),
-              disabled: currentPage === 0,
-              className: "px-4 py-2 rounded-lg transition-colors",
-              style: {
-                background: currentPage === 0 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
-                color: currentPage === 0 ? '#9ca3af' : '#4a90a4',
-                border: `1px solid ${currentPage === 0 ? '#e5e7eb' : '#4a90a4'}`,
-                cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
-              }
-            }, '← Previous'),
-            
-            React.createElement('span', {
-              className: "text-sm font-medium",
-              style: { color: '#4a90a4' }
-            }, `Page ${currentPage + 1} of ${totalPages} (${monthReleases.length} total releases)`),
-            
-            React.createElement('button', {
-              onClick: () => setCurrentPage(Math.min(totalPages - 1, currentPage + 1)),
-              disabled: currentPage === totalPages - 1,
-              className: "px-4 py-2 rounded-lg transition-colors",
-              style: {
-                background: currentPage === totalPages - 1 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
-                color: currentPage === totalPages - 1 ? '#9ca3af' : '#4a90a4',
-                border: `1px solid ${currentPage === totalPages - 1 ? '#e5e7eb' : '#4a90a4'}`,
-                cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
-              }
-            }, 'Next →')
-          );
-        })()
+        )
       )
     )
   );
