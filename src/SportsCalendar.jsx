@@ -419,11 +419,11 @@ const HockeyCardCalendar = () => {
                     }
                   },
                     React.createElement('div', { className: "flex items-center gap-1" },
-                      React.createElement('span', { style: { fontSize: '10px' } }, "🏒"),
+                      React.createElement('span', { style: { fontSize: '12px' } }, "🏒"),
                       React.createElement('div', { 
                         className: "font-semibold truncate",
-                        style: { fontSize: '9px', lineHeight: '1.2' }
-                      }, release.setName.length > 20 ? release.setName.substring(0, 20) + '...' : release.setName)
+                        style: { fontSize: '11px', lineHeight: '1.2', fontWeight: '700' }
+                      }, release.setName.length > 15 ? release.setName.substring(0, 15) + '...' : release.setName)
                     )
                   )
                 ).concat(
