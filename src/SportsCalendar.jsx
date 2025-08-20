@@ -122,7 +122,7 @@ const HockeyCardCalendar = () => {
       className: "max-w-6xl mx-auto p-6",
       style: { 
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 25%, #06b6d4 50%, #8b5cf6 75%, #ec4899 100%)',
+        background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite',
         borderRadius: '24px',
@@ -167,7 +167,7 @@ const HockeyCardCalendar = () => {
             fontSize: '16px',
             margin: 0
           }
-        }, "Track upcoming hockey card releases - all releases dates are subject to revision by UD")
+        }, "Track upcoming hockey card releases and pre-orders")
       ),
 
       // Controls Bar
@@ -330,17 +330,57 @@ const HockeyCardCalendar = () => {
                 releases.slice(0, 2).map(release =>
                   React.createElement('div', {
                     key: release.id,
-                    className: "mb-1 p-1 rounded border text-xs cursor-pointer transition-shadow",
+                    className: "mb-1 p-1 rounded border text-xs cursor-pointer transition-shadow relative",
                     style: {
                       backgroundColor: '#dbeafe',
                       borderColor: '#3b82f6',
-                      color: '#1e40af'
+                      color: '#1e40af',
+                      position: 'relative'
                     },
                     onMouseEnter: (e) => {
                       e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      
+                      // Create tooltip for individual releases
+                      const tooltip = document.createElement('div');
+                      tooltip.innerHTML = `<div style="font-size: 12px; line-height: 1.3;"><strong>${release.setName}</strong><br><span style="opacity: 0.8;">${release.year} Series</span><br><span style="opacity: 0.7; font-size: 10px;">${release.releaseDate.toLocaleDateString()}</span></div>`;
+                      tooltip.style.cssText = `
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(0, 0, 0, 0.9);
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        font-size: 11px;
+                        z-index: 1000;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                        pointer-events: none;
+                        max-width: 200px;
+                        white-space: normal;
+                        line-height: 1.3;
+                        margin-bottom: 5px;
+                      `;
+                      // Add arrow
+                      const arrow = document.createElement('div');
+                      arrow.style.cssText = `
+                        position: absolute;
+                        top: 100%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        border: 5px solid transparent;
+                        border-top-color: rgba(0, 0, 0, 0.9);
+                      `;
+                      tooltip.appendChild(arrow);
+                      e.target.appendChild(tooltip);
+                      e.target._tooltip = tooltip;
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
+                      if (e.target._tooltip) {
+                        e.target.removeChild(e.target._tooltip);
+                        e.target._tooltip = null;
+                      }
                     }
                   },
                     React.createElement('div', { className: "flex items-center gap-1" },
