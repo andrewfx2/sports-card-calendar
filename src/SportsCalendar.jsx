@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Clock, Package } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Package } from 'lucide-react';
 
 const HockeyCardCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -25,30 +25,15 @@ const HockeyCardCalendar = () => {
       if (!line) continue;
 
       const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-      if (values.length >= 4) {
+      if (values.length >= 3) {
         const releaseDate = new Date(values[2]);
-        const preOrderDate = new Date(values[3]);
         
         if (!isNaN(releaseDate.getTime())) {
           data.push({
             id: i,
             setName: values[0],
             year: values[1],
-            releaseDate: releaseDate,
-            preOrderDate: !isNaN(preOrderDate.getTime()) ? preOrderDate : null,
-            type: 'release'
-          });
-        }
-
-        // Add pre-order date as separate entry if it exists
-        if (!isNaN(preOrderDate.getTime())) {
-          data.push({
-            id: `${i}-preorder`,
-            setName: values[0],
-            year: values[1],
-            releaseDate: releaseDate,
-            preOrderDate: preOrderDate,
-            type: 'preorder'
+            releaseDate: releaseDate
           });
         }
       }
@@ -108,10 +93,9 @@ const HockeyCardCalendar = () => {
   const getReleasesForDate = (date) => {
     if (!date) return [];
     
-    return cardReleases.filter(release => {
-      const compareDate = release.type === 'preorder' ? release.preOrderDate : release.releaseDate;
-      return compareDate && compareDate.toDateString() === date.toDateString();
-    });
+    return cardReleases.filter(release => 
+      release.releaseDate && release.releaseDate.toDateString() === date.toDateString()
+    );
   };
 
   const navigateMonth = (direction) => {
@@ -311,9 +295,9 @@ const HockeyCardCalendar = () => {
                     key: release.id,
                     className: "mb-2 p-2 rounded-md border text-xs cursor-pointer transition-shadow",
                     style: {
-                      backgroundColor: release.type === 'preorder' ? '#fef3c7' : '#dbeafe',
-                      borderColor: release.type === 'preorder' ? '#f59e0b' : '#3b82f6',
-                      color: release.type === 'preorder' ? '#92400e' : '#1e40af'
+                      backgroundColor: '#dbeafe',
+                      borderColor: '#3b82f6',
+                      color: '#1e40af'
                     },
                     onMouseEnter: (e) => {
                       e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
@@ -324,7 +308,7 @@ const HockeyCardCalendar = () => {
                   },
                     React.createElement('div', { className: "flex items-center gap-1 mb-1" },
                       React.createElement('span', { className: "text-lg" }, "🏒"),
-                      React.createElement(release.type === 'preorder' ? Clock : Package, { 
+                      React.createElement(Package, { 
                         className: "w-3 h-3" 
                       })
                     ),
@@ -334,10 +318,7 @@ const HockeyCardCalendar = () => {
                     }, release.setName),
                     React.createElement('div', { 
                       style: { opacity: 0.8, fontSize: '10px' }
-                    }, release.year),
-                    React.createElement('div', { 
-                      style: { fontSize: '10px', marginTop: '2px' }
-                    }, release.type === 'preorder' ? 'Pre-Order' : 'Release')
+                    }, release.year)
                   )
                 )
               )
@@ -366,17 +347,12 @@ const HockeyCardCalendar = () => {
         
         React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
           cardReleases
-            .filter(release => {
-              const compareDate = release.type === 'preorder' ? release.preOrderDate : release.releaseDate;
-              return compareDate &&
-                compareDate.getMonth() === currentDate.getMonth() &&
-                compareDate.getFullYear() === currentDate.getFullYear();
-            })
-            .sort((a, b) => {
-              const dateA = a.type === 'preorder' ? a.preOrderDate : a.releaseDate;
-              const dateB = b.type === 'preorder' ? b.preOrderDate : b.releaseDate;
-              return dateA - dateB;
-            })
+            .filter(release => 
+              release.releaseDate &&
+              release.releaseDate.getMonth() === currentDate.getMonth() &&
+              release.releaseDate.getFullYear() === currentDate.getFullYear()
+            )
+            .sort((a, b) => a.releaseDate - b.releaseDate)
             .map(release =>
               React.createElement('div', {
                 key: release.id,
@@ -411,11 +387,11 @@ const HockeyCardCalendar = () => {
                       React.createElement('span', {
                         className: "px-2 py-1 text-xs font-medium rounded",
                         style: {
-                          backgroundColor: release.type === 'preorder' ? '#fef3c7' : '#dbeafe',
-                          color: release.type === 'preorder' ? '#92400e' : '#1e40af'
+                          backgroundColor: '#dbeafe',
+                          color: '#1e40af'
                         }
-                      }, release.type === 'preorder' ? 'Pre-Order' : 'Release'),
-                      React.createElement(release.type === 'preorder' ? Clock : Package, { 
+                      }, 'Release'),
+                      React.createElement(Package, { 
                         className: "w-3 h-3",
                         style: { color: '#4a90a4' }
                       })
@@ -426,7 +402,7 @@ const HockeyCardCalendar = () => {
                       React.createElement('span', { 
                         className: "text-sm",
                         style: { color: '#6b7280' }
-                      }, (release.type === 'preorder' ? release.preOrderDate : release.releaseDate).toLocaleDateString())
+                      }, release.releaseDate.toLocaleDateString())
                     )
                   )
                 )
