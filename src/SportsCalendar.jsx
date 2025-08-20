@@ -374,12 +374,27 @@ const HockeyCardCalendar = () => {
                       tooltip.appendChild(arrow);
                       e.target.appendChild(tooltip);
                       e.target._tooltip = tooltip;
+                      
+                      // Add scroll listener to clean up tooltip
+                      const cleanupTooltip = () => {
+                        if (e.target._tooltip) {
+                          e.target.removeChild(e.target._tooltip);
+                          e.target._tooltip = null;
+                        }
+                        window.removeEventListener('scroll', cleanupTooltip, true);
+                      };
+                      window.addEventListener('scroll', cleanupTooltip, true);
+                      e.target._scrollCleanup = cleanupTooltip;
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
                       if (e.target._tooltip) {
                         e.target.removeChild(e.target._tooltip);
                         e.target._tooltip = null;
+                      }
+                      if (e.target._scrollCleanup) {
+                        window.removeEventListener('scroll', e.target._scrollCleanup, true);
+                        e.target._scrollCleanup = null;
                       }
                     }
                   },
@@ -442,11 +457,26 @@ const HockeyCardCalendar = () => {
                         tooltip.appendChild(arrow);
                         e.target.appendChild(tooltip);
                         e.target._tooltip = tooltip;
+                        
+                        // Add scroll listener to clean up tooltip
+                        const cleanupTooltip = () => {
+                          if (e.target._tooltip) {
+                            e.target.removeChild(e.target._tooltip);
+                            e.target._tooltip = null;
+                          }
+                          window.removeEventListener('scroll', cleanupTooltip, true);
+                        };
+                        window.addEventListener('scroll', cleanupTooltip, true);
+                        e.target._scrollCleanup = cleanupTooltip;
                       },
                       onMouseLeave: (e) => {
                         if (e.target._tooltip) {
                           e.target.removeChild(e.target._tooltip);
                           e.target._tooltip = null;
+                        }
+                        if (e.target._scrollCleanup) {
+                          window.removeEventListener('scroll', e.target._scrollCleanup, true);
+                          e.target._scrollCleanup = null;
                         }
                       }
                     }, `+${releases.length - 2} more`)
