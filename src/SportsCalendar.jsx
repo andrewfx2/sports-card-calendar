@@ -177,52 +177,23 @@ const HockeyCardCalendar = () => {
         }
       `),
       
-      // Header
+      // Controls Bar with everything on one line
       React.createElement('div', { 
-        className: "mb-4 p-4 rounded-lg",
-        style: {
-          background: 'rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: '20px',
-          textAlign: 'center',
-          boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)'
-        }
-      },
-        React.createElement('h1', { 
-          className: "text-3xl font-bold mb-2",
-          style: { 
-            color: 'white',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-            marginBottom: '10px'
-          }
-        }, "🏒 New Release Calender"),
-        React.createElement('p', { 
-          style: { 
-            color: 'rgba(255,255,255,0.9)',
-            fontSize: '16px',
-            margin: 0
-          }
-        }, "Track upcoming hockey card releases and pre orders - all dates are subject to delays")
-      ),
-
-      // Controls Bar
-      React.createElement('div', { 
-        className: "flex items-center justify-between mb-4 p-3 rounded-lg controls-mobile",
+        className: "flex items-center justify-between mb-4 p-3 rounded-lg",
         style: {
           background: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.3)',
           borderRadius: '16px',
-          flexWrap: 'wrap',
-          gap: '10px',
+          gap: '12px',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          flexWrap: 'nowrap'
         }
       },
-        // Navigation
+        // Left side: Navigation + Title
         React.createElement('div', { 
-          className: "flex items-center gap-3 nav-mobile",
+          className: "flex items-center gap-3",
           style: { flexShrink: 1, minWidth: 0 }
         },
           React.createElement('button', {
@@ -244,9 +215,7 @@ const HockeyCardCalendar = () => {
             style: { 
               color: 'white',
               whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              minWidth: 0
+              flexShrink: 0
             }
           }, monthNames[currentDate.getMonth()] + " " + currentDate.getFullYear()),
           
@@ -262,13 +231,24 @@ const HockeyCardCalendar = () => {
               boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
               flexShrink: 0
             }
-          }, React.createElement(ChevronRight, { className: "w-5 h-5" }))
+          }, React.createElement(ChevronRight, { className: "w-5 h-5" })),
+          
+          // Title beside navigation
+          React.createElement('h1', { 
+            className: "text-xl font-bold",
+            style: { 
+              color: 'white',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              marginLeft: '12px',
+              whiteSpace: 'nowrap'
+            }
+          }, "🏒 Hockey Card Release Calendar")
         ),
         
-        // Action buttons
+        // Right side: Action buttons
         React.createElement('div', { 
-          className: "flex gap-2 buttons-mobile",
-          style: { flexShrink: 0, flexWrap: 'nowrap' }
+          className: "flex gap-2",
+          style: { flexShrink: 0 }
         },
           React.createElement('button', {
             onClick: () => setCurrentDate(new Date()),
