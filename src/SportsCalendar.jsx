@@ -235,7 +235,7 @@ const HockeyCardCalendar = () => {
           
           // Title beside navigation
           React.createElement('h1', { 
-            className: "text-lg font-bold",
+            className: "text-sm font-semibold",
             style: { 
               color: 'white',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
@@ -243,7 +243,7 @@ const HockeyCardCalendar = () => {
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              maxWidth: 'calc(100vw - 400px)'
+              maxWidth: '300px'
             }
           }, "Hockey Card Release Calendar")
         ),
