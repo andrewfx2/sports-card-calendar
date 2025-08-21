@@ -143,7 +143,7 @@ const HockeyCardCalendar = () => {
       
       // Header
       React.createElement('div', { 
-        className: "mb-8 p-6 rounded-lg",
+        className: "mb-4 p-4 rounded-lg",
         style: {
           background: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(20px)',
@@ -172,7 +172,7 @@ const HockeyCardCalendar = () => {
 
       // Controls Bar
       React.createElement('div', { 
-        className: "flex items-center justify-between mb-6 p-4 rounded-lg",
+        className: "flex items-center justify-between mb-4 p-3 rounded-lg",
         style: {
           background: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(20px)',
