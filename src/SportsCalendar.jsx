@@ -179,14 +179,16 @@ const HockeyCardCalendar = () => {
           border: '1px solid rgba(255,255,255,0.3)',
           borderRadius: '16px',
           flexWrap: 'wrap',
-          gap: '15px',
+          gap: '10px',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          width: '100%',
-          maxWidth: '100%'
+          overflow: 'hidden'
         }
       },
         // Navigation
-        React.createElement('div', { className: "flex items-center gap-4" },
+        React.createElement('div', { 
+          className: "flex items-center gap-3",
+          style: { flexShrink: 1, minWidth: 0 }
+        },
           React.createElement('button', {
             onClick: () => navigateMonth(-1),
             className: "p-2 rounded-lg transition-colors",
