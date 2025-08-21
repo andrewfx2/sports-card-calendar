@@ -72,35 +72,6 @@ const HockeyCardCalendar = () => {
     fetchSheetData();
   }, []);
 
-  const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    const days = [];
-    
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null);
-    }
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new Date(year, month, day));
-    }
-    
-    return days;
-  };
-
-  const getReleasesForDate = (date) => {
-    if (!date) return [];
-    
-    return cardReleases.filter(release => 
-      release.releaseDate && release.releaseDate.toDateString() === date.toDateString()
-    );
-  };
-
   const navigateMonth = (direction) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
@@ -109,7 +80,34 @@ const HockeyCardCalendar = () => {
     setIsDropdownOpen(false); // Close dropdown when changing months
   };
 
-  const days = getDaysInMonth(currentDate);
+  // Group releases by date for the current month
+  const getGroupedReleases = () => {
+    const monthReleases = cardReleases.filter(release => 
+      release.releaseDate &&
+      release.releaseDate.getMonth() === currentDate.getMonth() &&
+      release.releaseDate.getFullYear() === currentDate.getFullYear()
+    );
+
+    const grouped = monthReleases.reduce((groups, release) => {
+      const dateKey = release.releaseDate.toDateString();
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(release);
+      return groups;
+    }, {});
+
+    // Sort dates chronologically
+    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+    
+    return sortedDates.map(dateKey => ({
+      dateKey,
+      date: new Date(dateKey),
+      releases: grouped[dateKey].sort((a, b) => a.setName.localeCompare(b.setName))
+    }));
+  };
+
+  const groupedReleases = getGroupedReleases();
 
   return React.createElement('div', { 
     className: "min-h-screen", 
@@ -132,52 +130,16 @@ const HockeyCardCalendar = () => {
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
       }
     },
-      // Add mobile-specific CSS
+      // Add gradient animation CSS
       React.createElement('style', {}, `
         @keyframes gradientShift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-        
-        /* Mobile-specific improvements */
-        @media (max-width: 768px) {
-          .calendar-container {
-            padding: 2px !important;
-          }
-          .calendar-day {
-            min-height: 80px !important;
-            padding: 4px !important;
-            touch-action: manipulation;
-          }
-          .calendar-grid {
-            gap: 1px !important;
-          }
-          .mobile-scroll {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-          .mobile-scroll::-webkit-scrollbar {
-            display: none;
-          }
-          .controls-mobile {
-            flex-direction: column !important;
-            gap: 12px !important;
-          }
-          .nav-mobile {
-            width: 100% !important;
-            justify-content: center !important;
-          }
-          .buttons-mobile {
-            width: 100% !important;
-            justify-content: center !important;
-          }
-        }
       `),
       
-      // Controls Bar with everything on one line
+      // Controls Bar
       React.createElement('div', { 
         className: "flex items-center justify-between mb-4 p-3 rounded-lg",
         style: {
@@ -309,9 +271,9 @@ const HockeyCardCalendar = () => {
         }
       }, `❌ Error: ${error}`),
 
-      // Calendar Grid
+      // Release List
       React.createElement('div', { 
-        className: "rounded-lg overflow-hidden mb-4 mobile-scroll",
+        className: "rounded-lg overflow-hidden mb-4",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
@@ -320,276 +282,135 @@ const HockeyCardCalendar = () => {
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         }
       },
-        // Days of week header
-        React.createElement('div', { 
-          className: "grid grid-cols-7 calendar-grid",
-          style: {
-            background: 'rgba(74, 144, 164, 0.1)',
-            borderBottom: '1px solid #e5e7eb'
-          }
-        },
-          ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day =>
-            React.createElement('div', { 
-              key: day, 
-              className: "p-4 text-center font-semibold",
-              style: { 
-                color: '#4a90a4',
-                padding: window.innerWidth <= 768 ? '8px 4px' : '16px'
-              }
-            }, day)
-          )
-        ),
-
-        // Calendar days
-        React.createElement('div', { 
-          className: "grid grid-cols-7 calendar-grid" 
-        },
-          days.map((date, index) => {
-            const releases = getReleasesForDate(date);
-            const isToday = date && date.toDateString() === new Date().toDateString();
+        groupedReleases.length === 0 ? 
+          React.createElement('div', {
+            style: { 
+              padding: '60px 40px', 
+              textAlign: 'center', 
+              color: '#6b7280' 
+            }
+          }, 
+            React.createElement('div', { style: { fontSize: '48px', marginBottom: '16px' } }, "🏒"),
+            React.createElement('h3', { style: { fontSize: '18px', margin: '0 0 8px 0', color: '#374151' } }, "No releases scheduled"),
+            React.createElement('p', { style: { margin: 0, fontSize: '14px' } }, `No hockey card releases found for ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`)
+          ) :
+          
+          groupedReleases.map((group, groupIndex) => {
+            const isToday = group.date.toDateString() === new Date().toDateString();
             
             return React.createElement('div', {
-              key: index,
-              className: "calendar-day border-r border-b border-gray-200",
+              key: group.dateKey,
               style: {
-                minHeight: window.innerWidth <= 768 ? '80px' : '128px',
-                padding: window.innerWidth <= 768 ? '4px' : '8px',
-                backgroundColor: date ? (isToday ? '#eff6ff' : 'white') : '#f9fafb',
-                borderColor: isToday ? '#93c5fd' : '#e5e7eb',
-                touchAction: 'manipulation'
+                borderBottom: groupIndex < groupedReleases.length - 1 ? '1px solid #f1f5f9' : 'none'
               }
             },
-              date && React.createElement('div', null,
+              // Date Header
+              React.createElement('div', {
+                style: {
+                  padding: '20px 24px 12px',
+                  background: isToday ? '#dbeafe' : '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0'
+                }
+              },
                 React.createElement('div', {
-                  className: "text-sm font-medium mb-2",
-                  style: { color: isToday ? '#2563eb' : '#111827' }
-                }, date.getDate()),
-                
-                // Show first 2 releases, then a "+X more" indicator
-                releases.slice(0, 2).map(release =>
+                  style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
+                },
+                  React.createElement('h3', {
+                    style: {
+                      margin: 0,
+                      color: isToday ? '#1e40af' : '#334155',
+                      fontSize: '20px',
+                      fontWeight: '600'
+                    }
+                  }, group.date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })),
+                  React.createElement('span', {
+                    style: {
+                      fontSize: '14px',
+                      color: '#64748b',
+                      background: 'rgba(100, 116, 139, 0.1)',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontWeight: '500'
+                    }
+                  }, `${group.releases.length} release${group.releases.length > 1 ? 's' : ''}`)
+                )
+              ),
+              
+              // Releases for this date
+              React.createElement('div', { style: { background: 'white' } },
+                group.releases.map((release, releaseIndex) =>
                   React.createElement('div', {
                     key: release.id,
-                    className: "mb-1 p-1 rounded border text-xs cursor-pointer transition-shadow relative",
                     style: {
-                      backgroundColor: '#dbeafe',
-                      borderColor: '#3b82f6',
-                      color: '#1e40af',
-                      position: 'relative'
+                      padding: '20px 24px',
+                      borderBottom: releaseIndex < group.releases.length - 1 ? '1px solid #f8fafc' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      transition: 'all 0.2s',
+                      cursor: 'pointer'
                     },
-                    onMouseEnter: (e) => {
-                      e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                      
-                      // Create tooltip for individual releases (EXACT same code as "+X more")
-                      const tooltip = document.createElement('div');
-                      tooltip.innerHTML = `<div style="margin-bottom: 4px; font-size: 11px;"><strong>${release.setName}</strong><br><span style="opacity: 0.8;">${release.year} Series</span><br><span style="opacity: 0.7; font-size: 10px;">${release.releaseDate.toLocaleDateString()}</span></div>`;
-                      tooltip.style.cssText = `
-                        position: absolute;
-                        bottom: 100%;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        background: rgba(0, 0, 0, 0.9);
-                        color: white;
-                        padding: 8px 12px;
-                        border-radius: 8px;
-                        font-size: 11px;
-                        white-space: nowrap;
-                        z-index: 1000;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                        pointer-events: none;
-                        max-width: 200px;
-                        white-space: normal;
-                        line-height: 1.3;
-                      `;
-                      // Add arrow
-                      const arrow = document.createElement('div');
-                      arrow.style.cssText = `
-                        position: absolute;
-                        top: 100%;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        border: 5px solid transparent;
-                        border-top-color: rgba(0, 0, 0, 0.9);
-                      `;
-                      tooltip.appendChild(arrow);
-                      e.target.appendChild(tooltip);
-                      e.target._tooltip = tooltip;
-                      
-                      // Multiple cleanup handlers for different scroll scenarios + more aggressive cleanup
-                      const cleanupTooltip = () => {
-                        if (e.target && e.target._tooltip) {
-                          try {
-                            e.target.removeChild(e.target._tooltip);
-                          } catch (err) {
-                            // Tooltip already removed
-                          }
-                          e.target._tooltip = null;
-                        }
-                      };
-                      
-                      // Listen for various scroll events
-                      const scrollEvents = ['scroll', 'wheel', 'touchmove'];
-                      scrollEvents.forEach(eventType => {
-                        window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                        document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                      });
-                      
-                      // Additional mouse tracking for more reliable cleanup
-                      const mouseTracker = (event) => {
-                        const rect = e.target.getBoundingClientRect();
-                        const isOutside = event.clientX < rect.left || 
-                                        event.clientX > rect.right || 
-                                        event.clientY < rect.top || 
-                                        event.clientY > rect.bottom;
-                        if (isOutside) {
-                          cleanupTooltip();
-                          document.removeEventListener('mousemove', mouseTracker);
-                        }
-                      };
-                      document.addEventListener('mousemove', mouseTracker);
-                      
-                      // Store cleanup function
-                      e.target._cleanupTooltip = () => {
-                        cleanupTooltip();
-                        document.removeEventListener('mousemove', mouseTracker);
-                        scrollEvents.forEach(eventType => {
-                          window.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                          document.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                        });
-                      };
-                      
-                      // Shorter auto-cleanup for individual releases
-                      setTimeout(() => {
-                        if (e.target && e.target._cleanupTooltip) {
-                          e.target._cleanupTooltip();
-                        }
-                      }, 2000);
+                    onMouseEnter: (e) => { 
+                      e.target.style.background = '#f8fafc';
+                      e.target.style.transform = 'translateX(4px)';
                     },
-                    onMouseLeave: (e) => {
-                      e.target.style.boxShadow = 'none';
-                      if (e.target._cleanupTooltip) {
-                        e.target._cleanupTooltip();
-                        e.target._cleanupTooltip = null;
-                      }
+                    onMouseLeave: (e) => { 
+                      e.target.style.background = 'white';
+                      e.target.style.transform = 'translateX(0)';
                     }
                   },
-                    React.createElement('div', { className: "flex items-center gap-1" },
-                      React.createElement('span', { style: { fontSize: '12px' } }, "🏒"),
-                      React.createElement('div', { 
-                        className: "font-semibold truncate",
-                        style: { fontSize: '11px', lineHeight: '1.2', fontWeight: '700' }
-                      }, release.setName.length > 15 ? release.setName.substring(0, 15) + '...' : release.setName)
+                    React.createElement('div', { style: { fontSize: '32px', flexShrink: 0 } }, "🏒"),
+                    React.createElement('div', { style: { flex: 1 } },
+                      React.createElement('h4', {
+                        style: { 
+                          margin: '0 0 6px 0', 
+                          fontSize: '22px', 
+                          fontWeight: '700', 
+                          color: '#111827',
+                          lineHeight: '1.3'
+                        }
+                      }, release.setName),
+                      React.createElement('p', {
+                        style: { 
+                          margin: '0 0 8px 0', 
+                          fontSize: '18px', 
+                          color: '#4b5563',
+                          fontWeight: '600'
+                        }
+                      }, `${release.year} Series`)
+                    ),
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+                      React.createElement('div', {
+                        style: {
+                          padding: '8px 16px',
+                          background: '#dbeafe',
+                          color: '#1e40af',
+                          borderRadius: '20px',
+                          fontSize: '18px',
+                          fontWeight: '700',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }
+                      },
+                        React.createElement(Package, { 
+                          style: { width: '16px', height: '16px' }
+                        }),
+                        'Release'
+                      )
                     )
                   )
-                ).concat(
-                  releases.length > 2 ? [
-                    React.createElement('div', {
-                      key: 'more',
-                      className: "text-xs text-center p-1 rounded relative",
-                      style: {
-                        backgroundColor: '#f3f4f6',
-                        color: '#6b7280',
-                        fontSize: '9px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        position: 'relative'
-                      },
-                      onMouseEnter: (e) => {
-                        // Create tooltip
-                        const tooltip = document.createElement('div');
-                        const additionalReleases = releases.slice(2);
-                        tooltip.innerHTML = additionalReleases.map(r => 
-                          `<div style="margin-bottom: 4px; font-size: 11px;"><strong>${r.setName}</strong><br><span style="opacity: 0.8;">${r.year}</span></div>`
-                        ).join('');
-                        tooltip.style.cssText = `
-                          position: absolute;
-                          bottom: 100%;
-                          left: 50%;
-                          transform: translateX(-50%);
-                          background: rgba(0, 0, 0, 0.9);
-                          color: white;
-                          padding: 8px 12px;
-                          border-radius: 8px;
-                          font-size: 11px;
-                          white-space: nowrap;
-                          z-index: 1000;
-                          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                          pointer-events: none;
-                          max-width: 200px;
-                          white-space: normal;
-                          line-height: 1.3;
-                        `;
-                        // Add arrow
-                        const arrow = document.createElement('div');
-                        arrow.style.cssText = `
-                          position: absolute;
-                          top: 100%;
-                          left: 50%;
-                          transform: translateX(-50%);
-                          border: 5px solid transparent;
-                          border-top-color: rgba(0, 0, 0, 0.9);
-                        `;
-                        tooltip.appendChild(arrow);
-                        e.target.appendChild(tooltip);
-                        e.target._tooltip = tooltip;
-                        
-                        // Multiple cleanup handlers for different scroll scenarios
-                        const cleanupTooltip = () => {
-                          if (e.target && e.target._tooltip) {
-                            try {
-                              e.target.removeChild(e.target._tooltip);
-                            } catch (err) {
-                              // Tooltip already removed
-                            }
-                            e.target._tooltip = null;
-                          }
-                        };
-                        
-                        // Listen for various scroll events
-                        const scrollEvents = ['scroll', 'wheel', 'touchmove'];
-                        scrollEvents.forEach(eventType => {
-                          window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                          document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                        });
-                        
-                        // Store cleanup function
-                        e.target._cleanupTooltip = () => {
-                          cleanupTooltip();
-                          scrollEvents.forEach(eventType => {
-                            window.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                            document.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
-                          });
-                        };
-                        
-                        // Auto-cleanup after 3 seconds as backup
-                        setTimeout(() => {
-                          if (e.target && e.target._cleanupTooltip) {
-                            e.target._cleanupTooltip();
-                          }
-                        }, 3000);
-                      },
-                      onMouseLeave: (e) => {
-                        if (e.target._cleanupTooltip) {
-                          e.target._cleanupTooltip();
-                          e.target._cleanupTooltip = null;
-                        }
-                      },
-                      onMouseOut: (e) => {
-                        // Additional cleanup for mouse out events
-                        if (e.target._cleanupTooltip) {
-                          e.target._cleanupTooltip();
-                          e.target._cleanupTooltip = null;
-                        }
-                      }
-                    }, `+${releases.length - 2} more`)
-                  ] : []
                 )
               )
             );
           })
-        )
       ),
 
-      // Upcoming Releases Dropdown
+      // Summary dropdown (simplified)
       React.createElement('div', { 
         className: "rounded-lg",
         style: {
@@ -600,7 +421,6 @@ const HockeyCardCalendar = () => {
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         }
       },
-        // Dropdown Header (always visible)
         React.createElement('div', {
           className: "p-4 cursor-pointer flex items-center justify-between",
           onClick: () => setIsDropdownOpen(!isDropdownOpen),
@@ -615,21 +435,14 @@ const HockeyCardCalendar = () => {
             style: { color: '#4a90a4', margin: 0 }
           },
             React.createElement('span', { className: "text-2xl" }, "🏒"),
-            "Upcoming Hockey Releases This Month",
+            "Month Summary",
             React.createElement('span', {
               className: "text-sm font-normal ml-2 px-2 py-1 rounded",
               style: {
                 backgroundColor: 'rgba(74, 144, 164, 0.1)',
                 color: '#4a90a4'
               }
-            }, (() => {
-              const monthReleases = cardReleases.filter(release => 
-                release.releaseDate &&
-                release.releaseDate.getMonth() === currentDate.getMonth() &&
-                release.releaseDate.getFullYear() === currentDate.getFullYear()
-              );
-              return `${monthReleases.length} total`;
-            })())
+            }, `${cardReleases.filter(r => r.releaseDate && r.releaseDate.getMonth() === currentDate.getMonth() && r.releaseDate.getFullYear() === currentDate.getFullYear()).length} total releases`)
           ),
           React.createElement('div', {
             className: "text-2xl",
@@ -641,132 +454,39 @@ const HockeyCardCalendar = () => {
           }, '▼')
         ),
         
-        // Dropdown Content (collapsible)
         isDropdownOpen && React.createElement('div', {
           className: "p-6",
-          style: {
-            borderRadius: '0 0 20px 20px'
-          }
+          style: { borderRadius: '0 0 20px 20px' }
         },
-          React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
-            (() => {
-              const monthReleases = cardReleases
-                .filter(release => 
-                  release.releaseDate &&
-                  release.releaseDate.getMonth() === currentDate.getMonth() &&
-                  release.releaseDate.getFullYear() === currentDate.getFullYear()
-                )
-                .sort((a, b) => a.releaseDate - b.releaseDate);
-              
-              const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
-              const startIndex = currentPage * releasesPerPage;
-              const paginatedReleases = monthReleases.slice(startIndex, startIndex + releasesPerPage);
-              
-              return paginatedReleases.map(release =>
-                React.createElement('div', {
-                  key: release.id,
-                  className: "border rounded-lg p-4 transition-shadow",
-                  style: {
-                    borderColor: '#e5e7eb',
-                    backgroundColor: 'white'
-                  },
-                  onMouseEnter: (e) => {
-                    e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                    e.target.style.borderColor = '#4a90a4';
-                  },
-                  onMouseLeave: (e) => {
-                    e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = '#e5e7eb';
-                  }
-                },
-                  React.createElement('div', { className: "flex items-start gap-3" },
-                    React.createElement('div', { className: "text-3xl" }, "🏒"),
-                    React.createElement('div', { className: "flex-1" },
-                      React.createElement('h4', { 
-                        className: "font-semibold mb-1",
-                        style: { color: '#111827' }
-                      }, release.setName),
-                      React.createElement('p', { 
-                        className: "text-sm mb-2",
-                        style: { color: '#6b7280' }
-                      }, `${release.year} Series`),
-                      React.createElement('div', { 
-                        className: "flex items-center gap-2 mb-2" 
-                      },
-                        React.createElement('span', {
-                          className: "px-2 py-1 text-xs font-medium rounded",
-                          style: {
-                            backgroundColor: '#dbeafe',
-                            color: '#1e40af'
-                          }
-                        }, 'Release'),
-                        React.createElement(Package, { 
-                          className: "w-3 h-3",
-                          style: { color: '#4a90a4' }
-                        })
-                      ),
-                      React.createElement('div', { 
-                        className: "flex items-center justify-between" 
-                      },
-                        React.createElement('span', { 
-                          className: "text-sm",
-                          style: { color: '#6b7280' }
-                        }, release.releaseDate.toLocaleDateString())
-                      )
-                    )
-                  )
-                )
-              );
-            })()
-          ),
-          
-          // Pagination for upcoming releases (only show when dropdown is open)
-          (() => {
-            const monthReleases = cardReleases
-              .filter(release => 
-                release.releaseDate &&
-                release.releaseDate.getMonth() === currentDate.getMonth() &&
-                release.releaseDate.getFullYear() === currentDate.getFullYear()
-              );
-            
-            const totalPages = Math.ceil(monthReleases.length / releasesPerPage);
-            
-            if (totalPages <= 1) return null;
-            
-            return React.createElement('div', {
-              className: "flex justify-center items-center gap-3 mt-6",
-              style: { paddingTop: '20px', borderTop: '1px solid #e5e7eb' }
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' } },
+            // Stats cards
+            React.createElement('div', {
+              style: {
+                background: '#f0f9ff',
+                padding: '16px',
+                borderRadius: '12px',
+                textAlign: 'center',
+                border: '1px solid #e0f2fe'
+              }
             },
-              React.createElement('button', {
-                onClick: () => setCurrentPage(Math.max(0, currentPage - 1)),
-                disabled: currentPage === 0,
-                className: "px-4 py-2 rounded-lg transition-colors",
-                style: {
-                  background: currentPage === 0 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
-                  color: currentPage === 0 ? '#9ca3af' : '#4a90a4',
-                  border: `1px solid ${currentPage === 0 ? '#e5e7eb' : '#4a90a4'}`,
-                  cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
-                }
-              }, '← Previous'),
-              
-              React.createElement('span', {
-                className: "text-sm font-medium",
-                style: { color: '#4a90a4' }
-              }, `Page ${currentPage + 1} of ${totalPages} (${monthReleases.length} total releases)`),
-              
-              React.createElement('button', {
-                onClick: () => setCurrentPage(Math.min(totalPages - 1, currentPage + 1)),
-                disabled: currentPage === totalPages - 1,
-                className: "px-4 py-2 rounded-lg transition-colors",
-                style: {
-                  background: currentPage === totalPages - 1 ? '#f3f4f6' : 'rgba(74, 144, 164, 0.1)',
-                  color: currentPage === totalPages - 1 ? '#9ca3af' : '#4a90a4',
-                  border: `1px solid ${currentPage === totalPages - 1 ? '#e5e7eb' : '#4a90a4'}`,
-                  cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
-                }
-              }, 'Next →')
-            );
-          })()
+              React.createElement('div', { style: { fontSize: '24px', fontWeight: '700', color: '#0369a1' } }, groupedReleases.length),
+              React.createElement('div', { style: { fontSize: '14px', color: '#64748b', marginTop: '4px' } }, 'Release Days')
+            ),
+            React.createElement('div', {
+              style: {
+                background: '#f0fdf4',
+                padding: '16px',
+                borderRadius: '12px',
+                textAlign: 'center',
+                border: '1px solid #dcfce7'
+              }
+            },
+              React.createElement('div', { style: { fontSize: '24px', fontWeight: '700', color: '#166534' } }, 
+                cardReleases.filter(r => r.releaseDate && r.releaseDate.getMonth() === currentDate.getMonth() && r.releaseDate.getFullYear() === currentDate.getFullYear()).length
+              ),
+              React.createElement('div', { style: { fontSize: '14px', color: '#64748b', marginTop: '4px' } }, 'Total Releases')
+            )
+          )
         )
       )
     )
