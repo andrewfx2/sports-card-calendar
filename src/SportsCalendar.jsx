@@ -375,7 +375,7 @@ const HockeyCardCalendar = () => {
                       e.target.appendChild(tooltip);
                       e.target._tooltip = tooltip;
                       
-                      // Multiple cleanup handlers for different scroll scenarios (EXACT same as "+X more")
+                      // Multiple cleanup handlers for different scroll scenarios + more aggressive cleanup
                       const cleanupTooltip = () => {
                         if (e.target && e.target._tooltip) {
                           try {
@@ -387,28 +387,43 @@ const HockeyCardCalendar = () => {
                         }
                       };
                       
-                      // Listen for various scroll events (EXACT same as "+X more")
+                      // Listen for various scroll events
                       const scrollEvents = ['scroll', 'wheel', 'touchmove'];
                       scrollEvents.forEach(eventType => {
                         window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                         document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                       });
                       
-                      // Store cleanup function (EXACT same as "+X more")
+                      // Additional mouse tracking for more reliable cleanup
+                      const mouseTracker = (event) => {
+                        const rect = e.target.getBoundingClientRect();
+                        const isOutside = event.clientX < rect.left || 
+                                        event.clientX > rect.right || 
+                                        event.clientY < rect.top || 
+                                        event.clientY > rect.bottom;
+                        if (isOutside) {
+                          cleanupTooltip();
+                          document.removeEventListener('mousemove', mouseTracker);
+                        }
+                      };
+                      document.addEventListener('mousemove', mouseTracker);
+                      
+                      // Store cleanup function
                       e.target._cleanupTooltip = () => {
                         cleanupTooltip();
+                        document.removeEventListener('mousemove', mouseTracker);
                         scrollEvents.forEach(eventType => {
                           window.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                           document.removeEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                         });
                       };
                       
-                      // Auto-cleanup after 3 seconds as backup (EXACT same as "+X more")
+                      // Shorter auto-cleanup for individual releases
                       setTimeout(() => {
                         if (e.target && e.target._cleanupTooltip) {
                           e.target._cleanupTooltip();
                         }
-                      }, 3000);
+                      }, 2000);
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
