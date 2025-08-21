@@ -240,12 +240,9 @@ const HockeyCardCalendar = () => {
               color: 'white',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
               marginLeft: '12px',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxWidth: '300px'
+              whiteSpace: 'nowrap'
             }
-          }, "Hockey Card Release Calendar")
+          }, "Release Calendar")
         ),
         
         // Right side: Action buttons
