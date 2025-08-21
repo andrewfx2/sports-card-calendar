@@ -282,6 +282,18 @@ const HockeyCardCalendar = () => {
         }
       }, `❌ Error: ${error}`),
 
+      // Disclaimer message
+      React.createElement('div', {
+        className: "mb-4 p-3 rounded-lg text-center",
+        style: {
+          background: 'rgba(255, 193, 7, 0.3)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: '500'
+        }
+      }, "⚠️ Release dates are subject to change by Upper Deck and may not be final"),
+
       // Release List
       React.createElement('div', { 
         className: "rounded-lg overflow-hidden mb-4",
