@@ -387,8 +387,8 @@ const HockeyCardCalendar = () => {
                         }
                       };
                       
-                      // Listen for various scroll events
-                      const scrollEvents = ['scroll', 'wheel', 'touchmove'];
+                      // Listen for various scroll events AND mouse movement
+                      const scrollEvents = ['scroll', 'wheel', 'touchmove', 'mousemove'];
                       scrollEvents.forEach(eventType => {
                         window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                         document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
@@ -403,12 +403,12 @@ const HockeyCardCalendar = () => {
                         });
                       };
                       
-                      // Auto-cleanup after 3 seconds as backup
+                      // Auto-cleanup after 1 second for individual releases (shorter timeout)
                       setTimeout(() => {
                         if (e.target && e.target._cleanupTooltip) {
                           e.target._cleanupTooltip();
                         }
-                      }, 3000);
+                      }, 1000);
                     },
                     onMouseLeave: (e) => {
                       e.target.style.boxShadow = 'none';
