@@ -137,8 +137,8 @@ const HockeyCardCalendar = () => {
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
-        width: 'fit-content',
-        minWidth: '600px',
+        width: '100%',
+        maxWidth: '600px',
         padding: '16px'
       }
     },
@@ -159,16 +159,16 @@ const HockeyCardCalendar = () => {
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.3)',
           borderRadius: '16px',
-          gap: '12px',
+          gap: '8px',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden',
-          flexWrap: 'nowrap'
+          flexWrap: 'wrap'
         }
       },
         // Left side: Navigation + Title
         React.createElement('div', { 
           className: "flex items-center gap-3",
-          style: { flexShrink: 1, minWidth: 0 }
+          style: { flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }
         },
           React.createElement('button', {
             onClick: () => navigateMonth(-1),
@@ -189,7 +189,8 @@ const HockeyCardCalendar = () => {
             style: { 
               color: 'white',
               whiteSpace: 'nowrap',
-              flexShrink: 0
+              flexShrink: 0,
+              fontSize: window.innerWidth < 768 ? '18px' : '24px'
             }
           }, monthNames[currentDate.getMonth()] + " " + currentDate.getFullYear()),
           
