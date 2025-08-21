@@ -196,14 +196,14 @@ const HockeyCardCalendar = () => {
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
             marginBottom: '10px'
           }
-        }, "🏒 Hockey Card Release Calendar"),
+        }, "🏒 New Release Calender"),
         React.createElement('p', { 
           style: { 
             color: 'rgba(255,255,255,0.9)',
             fontSize: '16px',
             margin: 0
           }
-        }, "Track upcoming hockey card releases and pre-orders")
+        }, "Track upcoming hockey card releases and pre orders - all dates are subject to delays")
       ),
 
       // Controls Bar
