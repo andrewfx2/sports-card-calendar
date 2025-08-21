@@ -119,7 +119,7 @@ const HockeyCardCalendar = () => {
     }
   },
     React.createElement('div', { 
-      className: "max-w-7xl mx-auto p-6",
+      className: "max-w-6xl mx-auto p-6",
       style: { 
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
@@ -340,9 +340,9 @@ const HockeyCardCalendar = () => {
                     onMouseEnter: (e) => {
                       e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
                       
-                      // Create tooltip for individual releases
+                      // Create tooltip for individual releases (EXACT same code as "+X more")
                       const tooltip = document.createElement('div');
-                      tooltip.innerHTML = `<div style="font-size: 12px; line-height: 1.3;"><strong>${release.setName}</strong><br><span style="opacity: 0.8;">${release.year} Series</span><br><span style="opacity: 0.7; font-size: 10px;">${release.releaseDate.toLocaleDateString()}</span></div>`;
+                      tooltip.innerHTML = `<div style="margin-bottom: 4px; font-size: 11px;"><strong>${release.setName}</strong><br><span style="opacity: 0.8;">${release.year} Series</span><br><span style="opacity: 0.7; font-size: 10px;">${release.releaseDate.toLocaleDateString()}</span></div>`;
                       tooltip.style.cssText = `
                         position: absolute;
                         bottom: 100%;
@@ -353,13 +353,13 @@ const HockeyCardCalendar = () => {
                         padding: 8px 12px;
                         border-radius: 8px;
                         font-size: 11px;
+                        white-space: nowrap;
                         z-index: 1000;
                         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                         pointer-events: none;
                         max-width: 200px;
                         white-space: normal;
                         line-height: 1.3;
-                        margin-bottom: 5px;
                       `;
                       // Add arrow
                       const arrow = document.createElement('div');
@@ -375,7 +375,7 @@ const HockeyCardCalendar = () => {
                       e.target.appendChild(tooltip);
                       e.target._tooltip = tooltip;
                       
-                      // Multiple cleanup handlers for different scroll scenarios
+                      // Multiple cleanup handlers for different scroll scenarios (EXACT same as "+X more")
                       const cleanupTooltip = () => {
                         if (e.target && e.target._tooltip) {
                           try {
@@ -387,14 +387,14 @@ const HockeyCardCalendar = () => {
                         }
                       };
                       
-                      // Listen for various scroll events AND mouse movement
-                      const scrollEvents = ['scroll', 'wheel', 'touchmove', 'mousemove'];
+                      // Listen for various scroll events (EXACT same as "+X more")
+                      const scrollEvents = ['scroll', 'wheel', 'touchmove'];
                       scrollEvents.forEach(eventType => {
                         window.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                         document.addEventListener(eventType, cleanupTooltip, { passive: true, capture: true });
                       });
                       
-                      // Store cleanup function
+                      // Store cleanup function (EXACT same as "+X more")
                       e.target._cleanupTooltip = () => {
                         cleanupTooltip();
                         scrollEvents.forEach(eventType => {
@@ -403,22 +403,14 @@ const HockeyCardCalendar = () => {
                         });
                       };
                       
-                      // Auto-cleanup after 1 second for individual releases (shorter timeout)
+                      // Auto-cleanup after 3 seconds as backup (EXACT same as "+X more")
                       setTimeout(() => {
                         if (e.target && e.target._cleanupTooltip) {
                           e.target._cleanupTooltip();
                         }
-                      }, 1000);
+                      }, 3000);
                     },
                     onMouseLeave: (e) => {
-                      e.target.style.boxShadow = 'none';
-                      if (e.target._cleanupTooltip) {
-                        e.target._cleanupTooltip();
-                        e.target._cleanupTooltip = null;
-                      }
-                    },
-                    onMouseOut: (e) => {
-                      // Additional cleanup for mouse out events
                       e.target.style.boxShadow = 'none';
                       if (e.target._cleanupTooltip) {
                         e.target._cleanupTooltip();
