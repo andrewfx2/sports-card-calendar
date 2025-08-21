@@ -128,6 +128,7 @@ const HockeyCardCalendar = () => {
     }
   },
     React.createElement('div', { 
+      className: "sports-calendar-container",
       style: { 
         background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
         backgroundSize: '400% 400%',
@@ -137,17 +138,29 @@ const HockeyCardCalendar = () => {
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
-        width: '100%',
-        maxWidth: '600px',
+        width: 'fit-content',
+        minWidth: '600px',
+        maxWidth: '100%',
         padding: '16px'
       }
     },
-      // Add gradient animation CSS
+      // Add gradient animation CSS + responsive styles
       React.createElement('style', {}, `
         @keyframes gradientShift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+        
+        @media (max-width: 768px) {
+          .sports-calendar-container {
+            width: 100% !important;
+            min-width: unset !important;
+            max-width: 100% !important;
+          }
+          .sports-calendar-title {
+            font-size: 18px !important;
+          }
         }
       `),
       
@@ -185,12 +198,11 @@ const HockeyCardCalendar = () => {
           }, React.createElement(ChevronLeft, { className: "w-5 h-5" })),
           
           React.createElement('h2', { 
-            className: "text-2xl font-bold",
+            className: "text-2xl font-bold sports-calendar-title",
             style: { 
               color: 'white',
               whiteSpace: 'nowrap',
-              flexShrink: 0,
-              fontSize: window.innerWidth < 768 ? '18px' : '24px'
+              flexShrink: 0
             }
           }, monthNames[currentDate.getMonth()] + " " + currentDate.getFullYear()),
           
