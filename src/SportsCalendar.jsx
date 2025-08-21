@@ -132,12 +132,48 @@ const HockeyCardCalendar = () => {
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
       }
     },
-      // Add keyframes for animated gradient
+      // Add mobile-specific CSS
       React.createElement('style', {}, `
         @keyframes gradientShift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 768px) {
+          .calendar-container {
+            padding: 2px !important;
+          }
+          .calendar-day {
+            min-height: 80px !important;
+            padding: 4px !important;
+            touch-action: manipulation;
+          }
+          .calendar-grid {
+            gap: 1px !important;
+          }
+          .mobile-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .mobile-scroll::-webkit-scrollbar {
+            display: none;
+          }
+          .controls-mobile {
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          .nav-mobile {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .buttons-mobile {
+            width: 100% !important;
+            justify-content: center !important;
+          }
         }
       `),
       
@@ -172,7 +208,7 @@ const HockeyCardCalendar = () => {
 
       // Controls Bar
       React.createElement('div', { 
-        className: "flex items-center justify-between mb-4 p-3 rounded-lg",
+        className: "flex items-center justify-between mb-4 p-3 rounded-lg controls-mobile",
         style: {
           background: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(20px)',
@@ -186,7 +222,7 @@ const HockeyCardCalendar = () => {
       },
         // Navigation
         React.createElement('div', { 
-          className: "flex items-center gap-3",
+          className: "flex items-center gap-3 nav-mobile",
           style: { flexShrink: 1, minWidth: 0 }
         },
           React.createElement('button', {
@@ -198,13 +234,20 @@ const HockeyCardCalendar = () => {
               borderRadius: '12px',
               color: 'white',
               cursor: 'pointer',
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
+              flexShrink: 0
             }
           }, React.createElement(ChevronLeft, { className: "w-5 h-5" })),
           
           React.createElement('h2', { 
             className: "text-2xl font-bold",
-            style: { color: 'white' }
+            style: { 
+              color: 'white',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: 0
+            }
           }, monthNames[currentDate.getMonth()] + " " + currentDate.getFullYear()),
           
           React.createElement('button', {
@@ -216,15 +259,16 @@ const HockeyCardCalendar = () => {
               borderRadius: '12px',
               color: 'white',
               cursor: 'pointer',
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
+              flexShrink: 0
             }
           }, React.createElement(ChevronRight, { className: "w-5 h-5" }))
         ),
         
         // Action buttons
         React.createElement('div', { 
-          className: "flex gap-2",
-          style: { flexShrink: 0 }
+          className: "flex gap-2 buttons-mobile",
+          style: { flexShrink: 0, flexWrap: 'nowrap' }
         },
           React.createElement('button', {
             onClick: () => setCurrentDate(new Date()),
@@ -287,7 +331,7 @@ const HockeyCardCalendar = () => {
 
       // Calendar Grid
       React.createElement('div', { 
-        className: "rounded-lg overflow-hidden mb-4",
+        className: "rounded-lg overflow-hidden mb-4 mobile-scroll",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
@@ -298,7 +342,7 @@ const HockeyCardCalendar = () => {
       },
         // Days of week header
         React.createElement('div', { 
-          className: "grid grid-cols-7",
+          className: "grid grid-cols-7 calendar-grid",
           style: {
             background: 'rgba(74, 144, 164, 0.1)',
             borderBottom: '1px solid #e5e7eb'
@@ -308,23 +352,31 @@ const HockeyCardCalendar = () => {
             React.createElement('div', { 
               key: day, 
               className: "p-4 text-center font-semibold",
-              style: { color: '#4a90a4' }
+              style: { 
+                color: '#4a90a4',
+                padding: window.innerWidth <= 768 ? '8px 4px' : '16px'
+              }
             }, day)
           )
         ),
 
         // Calendar days
-        React.createElement('div', { className: "grid grid-cols-7" },
+        React.createElement('div', { 
+          className: "grid grid-cols-7 calendar-grid" 
+        },
           days.map((date, index) => {
             const releases = getReleasesForDate(date);
             const isToday = date && date.toDateString() === new Date().toDateString();
             
             return React.createElement('div', {
               key: index,
-              className: "min-h-32 border-r border-b border-gray-200 p-2",
+              className: "calendar-day border-r border-b border-gray-200",
               style: {
+                minHeight: window.innerWidth <= 768 ? '80px' : '128px',
+                padding: window.innerWidth <= 768 ? '4px' : '8px',
                 backgroundColor: date ? (isToday ? '#eff6ff' : 'white') : '#f9fafb',
-                borderColor: isToday ? '#93c5fd' : '#e5e7eb'
+                borderColor: isToday ? '#93c5fd' : '#e5e7eb',
+                touchAction: 'manipulation'
               }
             },
               date && React.createElement('div', null,
