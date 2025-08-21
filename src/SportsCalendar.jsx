@@ -119,7 +119,7 @@ const HockeyCardCalendar = () => {
     }
   },
     React.createElement('div', { 
-      className: "max-w-6xl mx-auto p-6",
+      className: "max-w-7xl mx-auto p-6",
       style: { 
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
@@ -416,6 +416,14 @@ const HockeyCardCalendar = () => {
                         e.target._cleanupTooltip();
                         e.target._cleanupTooltip = null;
                       }
+                    },
+                    onMouseOut: (e) => {
+                      // Additional cleanup for mouse out events
+                      e.target.style.boxShadow = 'none';
+                      if (e.target._cleanupTooltip) {
+                        e.target._cleanupTooltip();
+                        e.target._cleanupTooltip = null;
+                      }
                     }
                   },
                     React.createElement('div', { className: "flex items-center gap-1" },
@@ -514,6 +522,13 @@ const HockeyCardCalendar = () => {
                         }, 3000);
                       },
                       onMouseLeave: (e) => {
+                        if (e.target._cleanupTooltip) {
+                          e.target._cleanupTooltip();
+                          e.target._cleanupTooltip = null;
+                        }
+                      },
+                      onMouseOut: (e) => {
+                        // Additional cleanup for mouse out events
                         if (e.target._cleanupTooltip) {
                           e.target._cleanupTooltip();
                           e.target._cleanupTooltip = null;
