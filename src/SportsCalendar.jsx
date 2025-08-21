@@ -235,14 +235,17 @@ const HockeyCardCalendar = () => {
           
           // Title beside navigation
           React.createElement('h1', { 
-            className: "text-xl font-bold",
+            className: "text-lg font-bold",
             style: { 
               color: 'white',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
               marginLeft: '12px',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: 'calc(100vw - 400px)'
             }
-          }, "🏒 Hockey Card Release Calendar")
+          }, "Hockey Card Release Calendar")
         ),
         
         // Right side: Action buttons
