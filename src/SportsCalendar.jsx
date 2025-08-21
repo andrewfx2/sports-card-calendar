@@ -154,7 +154,7 @@ const HockeyCardCalendar = () => {
         }
       },
         React.createElement('h1', { 
-          className: "text-4xl font-bold mb-2",
+          className: "text-3xl font-bold mb-2",
           style: { 
             color: 'white',
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
@@ -259,7 +259,7 @@ const HockeyCardCalendar = () => {
 
       // Status Bar
       lastUpdated && React.createElement('div', {
-        className: "mb-6 p-3 rounded-lg text-center",
+        className: "mb-4 p-2 rounded-lg text-center",
         style: {
           background: 'rgba(76, 175, 80, 0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
@@ -269,7 +269,7 @@ const HockeyCardCalendar = () => {
       }, `✅ Last updated: ${lastUpdated.toLocaleString()}`),
 
       error && React.createElement('div', {
-        className: "mb-6 p-3 rounded-lg text-center",
+        className: "mb-4 p-2 rounded-lg text-center",
         style: {
           background: 'rgba(244, 67, 54, 0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
@@ -280,7 +280,7 @@ const HockeyCardCalendar = () => {
 
       // Calendar Grid
       React.createElement('div', { 
-        className: "rounded-lg overflow-hidden mb-8",
+        className: "rounded-lg overflow-hidden mb-4",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
