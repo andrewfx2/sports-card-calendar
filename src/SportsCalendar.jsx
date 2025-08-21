@@ -119,7 +119,7 @@ const HockeyCardCalendar = () => {
     }
   },
     React.createElement('div', { 
-      className: "max-w-6xl mx-auto p-6",
+      className: "max-w-6xl mx-auto p-4",
       style: { 
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
@@ -180,7 +180,9 @@ const HockeyCardCalendar = () => {
           borderRadius: '16px',
           flexWrap: 'wrap',
           gap: '15px',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+          width: '100%',
+          maxWidth: '100%'
         }
       },
         // Navigation
@@ -218,7 +220,10 @@ const HockeyCardCalendar = () => {
         ),
         
         // Action buttons
-        React.createElement('div', { className: "flex gap-2" },
+        React.createElement('div', { 
+          className: "flex gap-2",
+          style: { flexShrink: 0 }
+        },
           React.createElement('button', {
             onClick: () => setCurrentDate(new Date()),
             className: "px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
