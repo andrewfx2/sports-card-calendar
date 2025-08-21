@@ -117,7 +117,6 @@ const HockeyCardCalendar = () => {
     React.createElement('div', { 
       className: "max-w-6xl mx-auto p-4",
       style: { 
-        minHeight: '100vh',
         background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite',
@@ -125,7 +124,9 @@ const HockeyCardCalendar = () => {
         margin: '20px auto',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
+        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+        width: 'fit-content',
+        minWidth: '600px'
       }
     },
       // Add gradient animation CSS
