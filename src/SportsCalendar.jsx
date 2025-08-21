@@ -8,6 +8,7 @@ const HockeyCardCalendar = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [expandedDates, setExpandedDates] = useState(new Set());
   const releasesPerPage = 3;
 
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7bXBVQ-wEiJdCk8-E-ZooW_wUhSRMVaJxvRoEMGquWgd-c3iBDcwpFpG7IuN104Qn1AKDtVtxqKWa/pub?output=csv';
@@ -76,6 +77,17 @@ const HockeyCardCalendar = () => {
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
     setCurrentPage(0); // Reset pagination when changing months
+    setExpandedDates(new Set()); // Collapse all dates when changing months
+  };
+
+  const toggleDate = (dateKey) => {
+    const newExpanded = new Set(expandedDates);
+    if (newExpanded.has(dateKey)) {
+      newExpanded.delete(dateKey);
+    } else {
+      newExpanded.add(dateKey);
+    }
+    setExpandedDates(newExpanded);
   };
 
   // Group releases by date for the current month
@@ -303,44 +315,71 @@ const HockeyCardCalendar = () => {
                 borderBottom: groupIndex < groupedReleases.length - 1 ? '1px solid #f1f5f9' : 'none'
               }
             },
-              // Date Header
+              // Date Header (clickable)
               React.createElement('div', {
                 style: {
                   padding: '20px 24px 12px',
                   background: isToday ? '#dbeafe' : '#f8fafc',
-                  borderBottom: '1px solid #e2e8f0'
+                  borderBottom: '1px solid #e2e8f0',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                  userSelect: 'none'
+                },
+                onClick: () => toggleDate(group.dateKey),
+                onMouseEnter: (e) => {
+                  if (!isToday) e.target.style.background = '#f1f5f9';
+                },
+                onMouseLeave: (e) => {
+                  if (!isToday) e.target.style.background = '#f8fafc';
                 }
               },
                 React.createElement('div', {
                   style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
                 },
-                  React.createElement('h3', {
+                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+                    React.createElement('h3', {
+                      style: {
+                        margin: 0,
+                        color: isToday ? '#1e40af' : '#334155',
+                        fontSize: '20px',
+                        fontWeight: '600'
+                      }
+                    }, group.date.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })),
+                    React.createElement('span', {
+                      style: {
+                        fontSize: '14px',
+                        color: '#64748b',
+                        background: 'rgba(100, 116, 139, 0.1)',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontWeight: '500'
+                      }
+                    }, `${group.releases.length} release${group.releases.length > 1 ? 's' : ''}`)
+                  ),
+                  React.createElement('div', {
                     style: {
-                      margin: 0,
-                      color: isToday ? '#1e40af' : '#334155',
                       fontSize: '20px',
-                      fontWeight: '600'
-                    }
-                  }, group.date.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })),
-                  React.createElement('span', {
-                    style: {
-                      fontSize: '14px',
                       color: '#64748b',
-                      background: 'rgba(100, 116, 139, 0.1)',
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontWeight: '500'
+                      transform: expandedDates.has(group.dateKey) ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease'
                     }
-                  }, `${group.releases.length} release${group.releases.length > 1 ? 's' : ''}`)
+                  }, '▼')
                 )
               ),
               
-              // Releases for this date
-              React.createElement('div', { style: { background: 'white' } },
+              // Releases for this date (collapsible)
+              React.createElement('div', { 
+                style: { 
+                  background: 'white',
+                  maxHeight: expandedDates.has(group.dateKey) ? '2000px' : '0',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.3s ease'
+                } 
+              },
                 group.releases.map((release, releaseIndex) =>
                   React.createElement('div', {
                     key: release.id,
