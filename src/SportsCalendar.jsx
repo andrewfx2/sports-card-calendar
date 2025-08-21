@@ -8,7 +8,6 @@ const HockeyCardCalendar = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const releasesPerPage = 3;
 
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7bXBVQ-wEiJdCk8-E-ZooW_wUhSRMVaJxvRoEMGquWgd-c3iBDcwpFpG7IuN104Qn1AKDtVtxqKWa/pub?output=csv';
@@ -77,7 +76,6 @@ const HockeyCardCalendar = () => {
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
     setCurrentPage(0); // Reset pagination when changing months
-    setIsDropdownOpen(false); // Close dropdown when changing months
   };
 
   // Group releases by date for the current month
@@ -408,86 +406,6 @@ const HockeyCardCalendar = () => {
               )
             );
           })
-      ),
-
-      // Summary dropdown (simplified)
-      React.createElement('div', { 
-        className: "rounded-lg",
-        style: {
-          background: 'rgba(255,255,255,0.98)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: '20px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
-        }
-      },
-        React.createElement('div', {
-          className: "p-4 cursor-pointer flex items-center justify-between",
-          onClick: () => setIsDropdownOpen(!isDropdownOpen),
-          style: {
-            borderBottom: isDropdownOpen ? '1px solid #e5e7eb' : 'none',
-            borderRadius: isDropdownOpen ? '20px 20px 0 0' : '20px',
-            transition: 'all 0.3s ease'
-          }
-        },
-          React.createElement('h3', { 
-            className: "text-xl font-bold flex items-center gap-2",
-            style: { color: '#4a90a4', margin: 0 }
-          },
-            React.createElement('span', { className: "text-2xl" }, "🏒"),
-            "Month Summary",
-            React.createElement('span', {
-              className: "text-sm font-normal ml-2 px-2 py-1 rounded",
-              style: {
-                backgroundColor: 'rgba(74, 144, 164, 0.1)',
-                color: '#4a90a4'
-              }
-            }, `${cardReleases.filter(r => r.releaseDate && r.releaseDate.getMonth() === currentDate.getMonth() && r.releaseDate.getFullYear() === currentDate.getFullYear()).length} total releases`)
-          ),
-          React.createElement('div', {
-            className: "text-2xl",
-            style: {
-              transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease',
-              color: '#4a90a4'
-            }
-          }, '▼')
-        ),
-        
-        isDropdownOpen && React.createElement('div', {
-          className: "p-6",
-          style: { borderRadius: '0 0 20px 20px' }
-        },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' } },
-            // Stats cards
-            React.createElement('div', {
-              style: {
-                background: '#f0f9ff',
-                padding: '16px',
-                borderRadius: '12px',
-                textAlign: 'center',
-                border: '1px solid #e0f2fe'
-              }
-            },
-              React.createElement('div', { style: { fontSize: '24px', fontWeight: '700', color: '#0369a1' } }, groupedReleases.length),
-              React.createElement('div', { style: { fontSize: '14px', color: '#64748b', marginTop: '4px' } }, 'Release Days')
-            ),
-            React.createElement('div', {
-              style: {
-                background: '#f0fdf4',
-                padding: '16px',
-                borderRadius: '12px',
-                textAlign: 'center',
-                border: '1px solid #dcfce7'
-              }
-            },
-              React.createElement('div', { style: { fontSize: '24px', fontWeight: '700', color: '#166534' } }, 
-                cardReleases.filter(r => r.releaseDate && r.releaseDate.getMonth() === currentDate.getMonth() && r.releaseDate.getFullYear() === currentDate.getFullYear()).length
-              ),
-              React.createElement('div', { style: { fontSize: '14px', color: '#64748b', marginTop: '4px' } }, 'Total Releases')
-            )
-          )
-        )
       )
     )
   );
