@@ -245,7 +245,7 @@ const HockeyCardCalendar = () => {
               textOverflow: 'ellipsis',
               maxWidth: '300px'
             }
-          }, "Release Calendar")
+          }, "Hockey Card Release Calendar")
         ),
         
         // Right side: Action buttons
