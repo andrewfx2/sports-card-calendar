@@ -145,6 +145,15 @@ const HockeyCardCalendar = () => {
           .sports-calendar-title {
             font-size: 18px !important;
           }
+          .mobile-title {
+            display: none !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .mobile-title {
+            display: none !important;
+          }
         }
       `),
       
@@ -206,14 +215,14 @@ const HockeyCardCalendar = () => {
           
           // Title beside navigation
           React.createElement('h1', { 
-            className: "text-sm font-semibold",
+            className: "text-sm font-semibold mobile-title",
             style: { 
               color: 'white',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
               marginLeft: '12px',
               whiteSpace: 'nowrap'
             }
-          }, "Hockey Card Release Calendar")
+          }, "Release Calendar")
         ),
         
         // Right side: Action buttons
