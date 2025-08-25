@@ -237,7 +237,7 @@ const HockeyCardCalendar = () => {
               marginLeft: '12px',
               whiteSpace: 'nowrap'
             }
-          }, "Hockey Card Release Calendar")
+          }, "Release Calendar")
         ),
         
         // Right side: Action buttons
