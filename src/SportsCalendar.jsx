@@ -108,7 +108,9 @@ const HockeyCardCalendar = () => {
       background: 'transparent',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       margin: 0,
-      padding: 0
+      padding: 0,
+      minHeight: 'auto',
+      height: 'auto'
     }
   },
     React.createElement('div', { 
@@ -118,7 +120,7 @@ const HockeyCardCalendar = () => {
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite',
         borderRadius: '24px',
-        margin: '0 auto',
+        margin: '20px auto',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
@@ -141,6 +143,8 @@ const HockeyCardCalendar = () => {
             width: 100% !important;
             min-width: unset !important;
             max-width: 100% !important;
+            padding: 12px !important;
+            margin: 10px auto !important;
           }
           .sports-calendar-title {
             font-size: 18px !important;
@@ -148,11 +152,22 @@ const HockeyCardCalendar = () => {
           .mobile-title {
             display: none !important;
           }
+          .release-container {
+            max-height: 40vh !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
         }
         
         @media (max-width: 480px) {
           .mobile-title {
             display: none !important;
+          }
+          .release-container {
+            max-height: 35vh !important;
+          }
+          .sports-calendar-container {
+            padding: 8px !important;
+            margin: 5px auto !important;
           }
         }
       `),
@@ -222,7 +237,7 @@ const HockeyCardCalendar = () => {
               marginLeft: '12px',
               whiteSpace: 'nowrap'
             }
-          }, "Release Calendar")
+          }, "Hockey Card Release Calendar")
         ),
         
         // Right side: Action buttons
@@ -303,14 +318,17 @@ const HockeyCardCalendar = () => {
 
       // Release List
       React.createElement('div', { 
-        className: "rounded-lg overflow-hidden",
+        className: "rounded-lg overflow-hidden release-container",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.3)',
           borderRadius: '20px',
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-          marginBottom: 0
+          marginBottom: 0,
+          maxHeight: '400px',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch'
         }
       },
         groupedReleases.length === 0 ? 
@@ -440,26 +458,6 @@ const HockeyCardCalendar = () => {
                           fontWeight: '600'
                         }
                       }, `${release.year} Series`)
-                    ),
-                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
-                      React.createElement('div', {
-                        style: {
-                          padding: '8px 16px',
-                          background: '#dbeafe',
-                          color: '#1e40af',
-                          borderRadius: '20px',
-                          fontSize: '18px',
-                          fontWeight: '700',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }
-                      },
-                        React.createElement(Package, { 
-                          style: { width: '16px', height: '16px' }
-                        }),
-                        'Release'
-                      )
                     )
                   )
                 )
