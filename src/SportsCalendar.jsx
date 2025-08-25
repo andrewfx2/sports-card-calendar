@@ -440,26 +440,6 @@ const HockeyCardCalendar = () => {
                           fontWeight: '600'
                         }
                       }, `${release.year} Series`)
-                    ),
-                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
-                      React.createElement('div', {
-                        style: {
-                          padding: '8px 16px',
-                          background: '#dbeafe',
-                          color: '#1e40af',
-                          borderRadius: '20px',
-                          fontSize: '18px',
-                          fontWeight: '700',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }
-                      },
-                        React.createElement(Package, { 
-                          style: { width: '16px', height: '16px' }
-                        }),
-                        'Release'
-                      )
                     )
                   )
                 )
