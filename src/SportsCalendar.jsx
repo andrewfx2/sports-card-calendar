@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Package } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = 'https://lwuwdvnyclgaogkqemxt.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3dXdkdm55Y2xnYW9na3FlbXh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4MjY3MDQsImV4cCI6MjA3MTQwMjcwNH0.n4aCBlmHiI0g51xwUQMVB6h4YmAKesZ1ZFL2ZX3755U';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const HockeyCardCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -7,62 +13,38 @@ const HockeyCardCalendar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(0);
   const [expandedDates, setExpandedDates] = useState(new Set());
-  const releasesPerPage = 3;
-
-  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQTcOEpZEF6E3px9QBNZP1LFoAhegD1tmeEvMMRUJi8-yRUmbYUfM3M8tD1rNrDRA0e46YC07dQpm52/pub?output=csv';
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const parseCSVData = (csvText) => {
-    const lines = csvText.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    const data = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-      if (values.length >= 3) {
-        const releaseDate = new Date(values[2]);
-        
-        if (!isNaN(releaseDate.getTime())) {
-          data.push({
-            id: i,
-            setName: values[0],
-            year: values[1],
-            releaseDate: releaseDate
-          });
-        }
-      }
-    }
-
-    return data;
-  };
-
   const fetchSheetData = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(SHEET_CSV_URL);
-      if (!response.ok) {
-        throw new Error('Failed to fetch sheet data');
-      }
+      const { data, error } = await supabase
+        .from('Hockey Releases') // ← Change this to your actual table name
+        .select('*')
+        .order('Release Date', { ascending: true });
       
-      const csvText = await response.text();
-      const parsedData = parseCSVData(csvText);
+      if (error) throw error;
       
-      setCardReleases(parsedData);
+      // Transform the data to match your existing component structure
+      const transformedData = data.map((item, index) => ({
+        id: item.id || index,
+        setName: item['Set Name'],
+        year: item['Year'],
+        releaseDate: new Date(item['Release Date'])
+      }));
+      
+      setCardReleases(transformedData);
       setLastUpdated(new Date());
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching sheet data:', err);
+      console.error('Error fetching Supabase data:', err);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +58,6 @@ const HockeyCardCalendar = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
-    setCurrentPage(0); // Reset pagination when changing months
     setExpandedDates(new Set()); // Collapse all dates when changing months
   };
 
@@ -164,173 +145,185 @@ const HockeyCardCalendar = () => {
         }
       `),
       
-      // Controls Bar
+      // Compact Controls Bar
       React.createElement('div', { 
-        className: "flex items-center justify-between mb-4 p-3 rounded-lg",
         style: {
           background: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: '16px',
-          gap: '8px',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          overflow: 'hidden',
-          flexWrap: 'wrap'
+          borderRadius: '12px',
+          padding: '8px 12px',
+          marginBottom: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
         }
       },
-        // Left side: Navigation + Title
+        // Navigation + Title
         React.createElement('div', { 
-          className: "flex items-center gap-3",
-          style: { flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }
+          style: { 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            flex: 1,
+            minWidth: 0
+          }
         },
           React.createElement('button', {
             onClick: () => navigateMonth(-1),
-            className: "p-2 rounded-lg transition-colors",
             style: {
               background: 'rgba(255,255,255,0.25)',
               border: '1px solid rgba(255,255,255,0.4)',
-              borderRadius: '12px',
+              borderRadius: '8px',
               color: 'white',
               cursor: 'pointer',
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
-              flexShrink: 0
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center'
             }
-          }, React.createElement(ChevronLeft, { className: "w-5 h-5" })),
+          }, React.createElement(ChevronLeft, { style: { width: '16px', height: '16px' } })),
           
           React.createElement('h2', { 
-            className: "text-2xl font-bold sports-calendar-title",
+            className: "sports-calendar-title",
             style: { 
               color: 'white',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
+              fontSize: '16px',
+              fontWeight: '600',
+              margin: 0,
+              whiteSpace: 'nowrap'
             }
           }, monthNames[currentDate.getMonth()] + " " + currentDate.getFullYear()),
           
           React.createElement('button', {
             onClick: () => navigateMonth(1),
-            className: "p-2 rounded-lg transition-colors",
             style: {
               background: 'rgba(255,255,255,0.25)',
               border: '1px solid rgba(255,255,255,0.4)',
-              borderRadius: '12px',
+              borderRadius: '8px',
               color: 'white',
               cursor: 'pointer',
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
-              flexShrink: 0
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center'
             }
-          }, React.createElement(ChevronRight, { className: "w-5 h-5" })),
-          
-          // Title beside navigation
-          React.createElement('h1', { 
-            className: "text-sm font-semibold",
-            style: { 
-              color: 'white',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              marginLeft: '12px',
-              whiteSpace: 'nowrap'
-            }
-          }, "Release Calendar")
+          }, React.createElement(ChevronRight, { style: { width: '16px', height: '16px' } }))
         ),
         
-        // Right side: Action buttons
+        // Action buttons
         React.createElement('div', { 
-          className: "flex gap-2",
-          style: { flexShrink: 0 }
+          style: { display: 'flex', gap: '6px' }
         },
           React.createElement('button', {
             onClick: () => setCurrentDate(new Date()),
-            className: "px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
             style: {
               background: 'rgba(255,255,255,0.25)',
               border: '1px solid rgba(255,255,255,0.4)',
-              borderRadius: '12px',
+              borderRadius: '8px',
               color: 'white',
               cursor: 'pointer',
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
+              padding: '6px 10px',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
             }
           },
-            React.createElement(Calendar, { className: "w-4 h-4" }),
+            React.createElement(Calendar, { style: { width: '12px', height: '12px' } }),
             "Today"
           ),
           
           React.createElement('button', {
             onClick: fetchSheetData,
             disabled: isLoading,
-            className: "px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
             style: {
               background: 'rgba(255,255,255,0.25)',
               border: '1px solid rgba(255,255,255,0.4)',
-              borderRadius: '12px',
+              borderRadius: '8px',
               color: 'white',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.7 : 1,
-              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center'
             }
           },
             React.createElement(RefreshCw, { 
-              className: `w-4 h-4 ${isLoading ? 'animate-spin' : ''}` 
-            }),
-            isLoading ? "Updating..." : "Refresh"
+              style: { 
+                width: '12px', 
+                height: '12px',
+                animation: isLoading ? 'spin 1s linear infinite' : 'none'
+              }
+            })
           )
         )
       ),
 
-      // Status Bar
+      // Compact Status Messages
       lastUpdated && React.createElement('div', {
-        className: "mb-4 p-2 rounded-lg text-center",
         style: {
           background: 'rgba(76, 175, 80, 0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
           color: 'white',
-          fontSize: '14px'
+          fontSize: '11px',
+          padding: '4px 8px',
+          marginBottom: '6px',
+          textAlign: 'center'
         }
-      }, `✅ Last updated: ${lastUpdated.toLocaleString()}`),
+      }, `✅ Updated: ${lastUpdated.toLocaleTimeString()}`),
 
       error && React.createElement('div', {
-        className: "mb-4 p-2 rounded-lg text-center",
         style: {
           background: 'rgba(244, 67, 54, 0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
           color: 'white',
-          fontSize: '14px'
+          fontSize: '11px',
+          padding: '4px 8px',
+          marginBottom: '6px',
+          textAlign: 'center'
         }
       }, `❌ Error: ${error}`),
 
-      // Disclaimer message
+      // Compact Disclaimer
       React.createElement('div', {
-        className: "mb-4 p-3 rounded-lg text-center",
         style: {
           background: 'rgba(255, 193, 7, 0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
           color: 'white',
-          fontSize: '14px',
-          fontWeight: '500'
+          fontSize: '10px',
+          padding: '4px 8px',
+          marginBottom: '8px',
+          textAlign: 'center'
         }
-      }, "⚠️ Release dates are subject to change by Upper Deck and may not be final"),
+      }, "⚠️ Dates subject to change"),
 
-      // Release List
+      // Compact Release List
       React.createElement('div', { 
-        className: "rounded-lg overflow-hidden",
         style: {
           background: 'rgba(255,255,255,0.98)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: '20px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-          marginBottom: 0
+          borderRadius: '12px',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+          maxHeight: '300px',
+          overflowY: 'auto'
         }
       },
         groupedReleases.length === 0 ? 
           React.createElement('div', {
             style: { 
-              padding: '60px 40px', 
+              padding: '30px 20px', 
               textAlign: 'center', 
               color: '#6b7280' 
             }
           }, 
-            React.createElement('div', { style: { fontSize: '48px', marginBottom: '16px' } }, "🏒"),
-            React.createElement('h3', { style: { fontSize: '18px', margin: '0 0 8px 0', color: '#374151' } }, "No releases scheduled"),
-            React.createElement('p', { style: { margin: 0, fontSize: '14px' } }, `No hockey card releases found for ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`)
+            React.createElement('div', { style: { fontSize: '24px', marginBottom: '8px' } }, "🏒"),
+            React.createElement('h3', { style: { fontSize: '14px', margin: '0 0 4px 0', color: '#374151' } }, "No releases"),
+            React.createElement('p', { style: { margin: 0, fontSize: '12px' } }, `No releases for ${monthNames[currentDate.getMonth()]}`)
           ) :
           
           groupedReleases.map((group, groupIndex) => {
@@ -342,10 +335,10 @@ const HockeyCardCalendar = () => {
                 borderBottom: groupIndex < groupedReleases.length - 1 ? '1px solid #f1f5f9' : 'none'
               }
             },
-              // Date Header (clickable)
+              // Compact Date Header
               React.createElement('div', {
                 style: {
-                  padding: '20px 24px 12px',
+                  padding: '12px 16px 8px',
                   background: isToday ? '#dbeafe' : '#f8fafc',
                   borderBottom: '1px solid #e2e8f0',
                   cursor: 'pointer',
@@ -363,33 +356,32 @@ const HockeyCardCalendar = () => {
                 React.createElement('div', {
                   style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
                 },
-                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
                     React.createElement('h3', {
                       style: {
                         margin: 0,
                         color: isToday ? '#1e40af' : '#334155',
-                        fontSize: '20px',
+                        fontSize: '14px',
                         fontWeight: '600'
                       }
                     }, group.date.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
+                      month: 'short', 
                       day: 'numeric' 
                     })),
                     React.createElement('span', {
                       style: {
-                        fontSize: '14px',
+                        fontSize: '11px',
                         color: '#64748b',
                         background: 'rgba(100, 116, 139, 0.1)',
-                        padding: '4px 12px',
-                        borderRadius: '12px',
+                        padding: '2px 6px',
+                        borderRadius: '8px',
                         fontWeight: '500'
                       }
-                    }, `${group.releases.length} release${group.releases.length > 1 ? 's' : ''}`)
+                    }, `${group.releases.length}`)
                   ),
                   React.createElement('div', {
                     style: {
-                      fontSize: '20px',
+                      fontSize: '14px',
                       color: '#64748b',
                       transform: expandedDates.has(group.dateKey) ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.3s ease'
@@ -398,11 +390,11 @@ const HockeyCardCalendar = () => {
                 )
               ),
               
-              // Releases for this date (collapsible)
+              // Compact Releases
               React.createElement('div', { 
                 style: { 
                   background: 'white',
-                  maxHeight: expandedDates.has(group.dateKey) ? '2000px' : '0',
+                  maxHeight: expandedDates.has(group.dateKey) ? '400px' : '0',
                   overflow: 'hidden',
                   transition: 'max-height 0.3s ease'
                 } 
@@ -411,62 +403,61 @@ const HockeyCardCalendar = () => {
                   React.createElement('div', {
                     key: release.id,
                     style: {
-                      padding: '20px 24px',
+                      padding: '12px 16px',
                       borderBottom: releaseIndex < group.releases.length - 1 ? '1px solid #f8fafc' : 'none',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '16px',
-                      transition: 'all 0.2s',
-                      cursor: 'pointer'
+                      gap: '12px',
+                      transition: 'all 0.2s'
                     },
                     onMouseEnter: (e) => { 
                       e.target.style.background = '#f8fafc';
-                      e.target.style.transform = 'translateX(4px)';
                     },
                     onMouseLeave: (e) => { 
                       e.target.style.background = 'white';
-                      e.target.style.transform = 'translateX(0)';
                     }
                   },
-                    React.createElement('div', { style: { fontSize: '32px', flexShrink: 0 } }, "🏒"),
-                    React.createElement('div', { style: { flex: 1 } },
+                    React.createElement('div', { style: { fontSize: '20px', flexShrink: 0 } }, "🏒"),
+                    React.createElement('div', { style: { flex: 1, minWidth: 0 } },
                       React.createElement('h4', {
                         style: { 
-                          margin: '0 0 6px 0', 
-                          fontSize: '22px', 
-                          fontWeight: '700', 
+                          margin: '0 0 2px 0', 
+                          fontSize: '14px', 
+                          fontWeight: '600', 
                           color: '#111827',
-                          lineHeight: '1.3'
+                          lineHeight: '1.2',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
                         }
                       }, release.setName),
                       React.createElement('p', {
                         style: { 
-                          margin: '0 0 8px 0', 
-                          fontSize: '18px', 
-                          color: '#4b5563',
-                          fontWeight: '600'
+                          margin: 0, 
+                          fontSize: '12px', 
+                          color: '#6b7280',
+                          fontWeight: '500'
                         }
                       }, `${release.year} Series`)
                     ),
-                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
-                      React.createElement('div', {
-                        style: {
-                          padding: '8px 16px',
-                          background: '#dbeafe',
-                          color: '#1e40af',
-                          borderRadius: '20px',
-                          fontSize: '18px',
-                          fontWeight: '700',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }
-                      },
-                        React.createElement(Package, { 
-                          style: { width: '16px', height: '16px' }
-                        }),
-                        'Release'
-                      )
+                    React.createElement('div', {
+                      style: {
+                        padding: '4px 8px',
+                        background: '#dbeafe',
+                        color: '#1e40af',
+                        borderRadius: '12px',
+                        fontSize: '10px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        flexShrink: 0
+                      }
+                    },
+                      React.createElement(Package, { 
+                        style: { width: '10px', height: '10px' }
+                      }),
+                      'Release'
                     )
                   )
                 )
