@@ -114,7 +114,7 @@ const HockeyCardCalendar = () => {
     React.createElement('div', { 
       className: "sports-calendar-container",
       style: { 
-        background: 'linear-gradient(135deg, #4a90a4 0%, #83cdea 100%)',
+        background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite',
         borderRadius: '24px',
